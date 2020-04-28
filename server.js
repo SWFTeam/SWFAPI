@@ -12,8 +12,23 @@ app.listen(PORT, function () {
 })
 
 app.get('/', (req, res) => {
+    console.log("NEW CONNECTION");
     res.send('SWF API v0');
 })
 
-console.log(db.insert("node", [[2, "TEST D'ATTRIBUT"]]));
+app.get('/test', (req, res) => {
+    let json = {
+        atttributTest: 'Je suis un attribut json de test',
+        content: [{
+            subtest: 'Je ne contient rien d\' autres que des attributs de test'
+        }]
+    };
+    res.status(200).send(json);
+})
+
+app.get('/error', (req, res) => {
+    res.status(500).send({ error: "Je suis une route de test d'erreur"});
+})
+
+//console.log(db.insert("node", [[2, "TEST D'ATTRIBUT"]]));
 
