@@ -1,0 +1,29 @@
+{
+	"user": {
+		"firstname": "Riton",
+		"lastname": "Gourgue",
+		"email_address": "*******@gmail.com",
+		"password": "AZERTYUIOP",
+		"address": {
+			"country": "France",
+			"city": "Massy",
+			"street": "Rue de la merde",
+			"zip_code": 91300,
+			"nb_house": 12,
+			"complement": "test de complement"
+		},
+		"birthday": "03/10/1997",
+		"address_work": {
+			"country": "USA",
+			"city": "NY",
+			"street": "Right corner street",
+			"zip_code": 45673,
+			"nb_house": 12,
+			"complement": "test de complement"
+		}
+	},
+	"needs": {
+			"hasBike": true,
+			"hasCar": true	
+	}
+}
