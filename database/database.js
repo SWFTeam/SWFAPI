@@ -21,7 +21,8 @@ async function _insertInto(table, attributes, data){
         let result = await asyncQuery(sql, data);
         return result.insertId;
     } catch(e) {
-        console.error(e);
+        console.error(e.sqlMessage);
+        return e;
     }
 }
 

@@ -4,6 +4,14 @@
 
 const db = require('../database/database.js');
 const conf = require('../database/conf.js');
+const token = require('../dist/token.js');
+
+const SUCCESS = 200;
+const CREATED = 201;
+const BAD_REQUEST = 400;
+const NOT_FOUND = 404;
+const FORBIDDEN = 403;
+const INT_ERR = 500;
 
 async function _createUser(req, res){
    db.connect(conf.db_server);
@@ -47,10 +55,34 @@ async function _createUser(req, res){
             attributes == null ? attributes = attr : attributes += "," + attr;
             user.push(usr[attr]);
         }
-        const insertedUser = await db.insert("user", attributes, [user]);
-        console.log("Utilisateur inséré:", insertedUser);
+        const user_result = await db.insert("user", attributes, [user]);
+        if(user_result.errno === undefined){
+            res.status(CREATED).send(
+                { 
+                    "user_id" : user_result,
+                    "token" : token.make(user_result)
+                }
+            );
+        } else if (user_result.errno !== undefined){
+            let code = INT_ERR;
+            let message = "Something bad occurs, please try again later...";
+            switch(user_result.errno){
+                case 1062:
+                    code = BAD_REQUEST;
+                    if(user_result.sqlMessage.indexOf("email") !== -1){
+                        message = "Email already exists";
+                    }
+                    break;
+                default:
+                    break;
+            }
+            res.status(code).send({ error: message})
+        } else {
+            res.status(INT_ERR).send("Something bad occurs, please try again later...");
+        }
+    } else {
+        res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
-    res.send("OK");
 }
 
 function _getUser(req, res){
