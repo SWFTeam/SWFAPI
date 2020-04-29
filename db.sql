@@ -11,9 +11,9 @@ DROP TABLE IF EXISTS achieve;
 DROP TABLE IF EXISTS event;
 DROP TABLE IF EXISTS need;
 DROP TABLE IF EXISTS challenge;
+DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS experience;
 DROP TABLE IF EXISTS advice;
-DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS address;
 DROP TABLE IF EXISTS survey;
 
@@ -49,9 +49,9 @@ CREATE TABLE IF NOT EXISTS user (
     firstname VARCHAR(100),
     lastname VARCHAR(100),
     email_address VARCHAR(200) UNIQUE,
+    password VARCHAR(255),
     birthday DATE,
     address_id INT NOT NULL,
-    experience DOUBLE,
     survey_id INT NOT NULL,
     address_work INT NULL,
 #   info_id INT NULL,
@@ -127,18 +127,17 @@ CREATE TABLE IF NOT EXISTS preference_advice (
 CREATE TABLE IF NOT EXISTS description(
     id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     country_code VARCHAR(3),
-    title VARCHAR(100),
+    title VARCHAR(100) UNIQUE,
+    name VARCHAR(100),
     description VARCHAR(255),
-    need_id INT NULL,
-    chall_id INT NULL,
-    event_id INT NULL,
-    advice_id INT NULL,
-    FOREIGN KEY (need_id) REFERENCES need(id),
-    FOREIGN KEY (chall_id) REFERENCES challenge(id),
-    FOREIGN KEY (event_id) REFERENCES event(id),
-    FOREIGN KEY (advice_id) REFERENCES advice(id)
+    type VARCHAR(10),
+    foreign_id INT NOT NULL
+    #need_id INT NULL,
+    #chall_id INT NULL,
+    #event_id INT NULL,
+    #advice_id INT NULL,
+    #FOREIGN KEY (need_id) REFERENCES need(id),
+    #FOREIGN KEY (chall_id) REFERENCES challenge(id),
+    #FOREIGN KEY (event_id) REFERENCES event(id),
+    #FOREIGN KEY (advice_id) REFERENCES advice(id)
 );
-
-## TEST DATA ##
-INSERT INTO need (id) VALUES (1);
-INSERT INTO description (country_code, title, description, need_id) VALUES ("FR", "NOM NEED", "Je suis un test de description de l'entité hasBike", 1);
