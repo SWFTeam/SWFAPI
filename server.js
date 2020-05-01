@@ -22,5 +22,6 @@ app.get('/', (req, res) => {
 /**
  * USER PART
  */
-app.post('/user', users.create);
-
+app.post('/signup', users.create);
+app.post('/signin', users.login);
+app.delete('/user', users.delete);

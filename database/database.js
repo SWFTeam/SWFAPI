@@ -10,9 +10,13 @@ function _connect(db_server){
         database: db_server.database || "SWF"
     });
     _con.connect(function(err) {
-        if (err) throw err;
-        console.log("Connected to " + db_server.database);
+        if (err) throw err
+        console.log("Connected to", db_server.database, "database");
     });
+}
+
+function _close(){
+    _con.end();
 }
 
 async function _insertInto(table, attributes, data){
@@ -32,7 +36,30 @@ async function _select(attributes, table, where){
         let result = await asyncQuery(sql);
         return result;
     } catch(e) {
-        console.error(e);
+        console.error(e.sqlMessage);
+        return e;
+    }
+}
+
+async function _delete(table, where){
+    try {
+        let sql = "DELETE FROM " + table + " WHERE " + where;
+        let result = await asyncQuery(sql);
+        return result;
+    } catch(e){
+        console.error(e.sqlMessage);
+        return e;
+    }
+}
+
+async function _update(attribute, value, table, where){
+    try {
+        let sql = "UPDATE " + table + " SET " + attribute + " = " + value + " WHERE " + where;
+        let result = await asyncQuery(sql);
+        return result;
+    } catch(e){
+        console.error(e.sqlMessage);
+        return e;
     }
 }
 
@@ -47,6 +74,8 @@ function asyncQuery(sql, data = null){
 
 module.exports = {
     connect: _connect,
+    close: _close,
     insert: _insertInto,
-    select: _select
+    select: _select,
+    delete: _delete
 }

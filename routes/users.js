@@ -5,13 +5,18 @@
 const db = require('../database/database.js');
 const conf = require('../database/conf.js');
 const token = require('../dist/token.js');
+const bcrypt = require('bcrypt');
 
 const SUCCESS = 200;
 const CREATED = 201;
+const UPDATED = 204;
 const BAD_REQUEST = 400;
+const UNAUTHORIZED = 401;
 const NOT_FOUND = 404;
 const FORBIDDEN = 403;
 const INT_ERR = 500;
+
+const SALT = 12;
 
 async function _createUser(req, res){
    db.connect(conf.db_server);
@@ -48,7 +53,11 @@ async function _createUser(req, res){
             }
         }
         db.insert("preference_survey", "survey_id, need_id", preference_survey);
+        //PASSWORD HASHING
+        usr.password = bcrypt.hashSync(usr.password, SALT);
+        //USER BIRTHDAY TO MYSQL FORMAT
         usr.birthday = new Date(usr.birthday).toMysqlFormat();
+        //INSERT USER
         attributes = null;
         let user = [];
         for(attr in usr){
@@ -83,14 +92,81 @@ async function _createUser(req, res){
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
+    db.close();
 }
 
-function _getUser(req, res){
-
+async function _getUser(req, res){
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    if(!db.connect(conf.db_server)) return;
+    let user = await db.select("*", "user", "id = " + decoded.id);
+    console.log(user);
+    res.send("OK");
 }
 
-function _deleteUser(req, res){
 
+async function _login(req, res){
+    if(req.body){
+        const email = req.body.email;
+        const password = req.body.password;
+        if(!email || !password){
+            res.status(BAD_REQUEST).send({error: "Missing email or password"});
+        }
+        //GET PASSWORD HASH FROM DB
+        db.connect(conf.db_server);
+        const hashed = await db.select("password", "user", "email_address = \"" + email + "\"");
+        const hash = hashed[0].password;
+        if(bcrypt.compareSync(password, hash)) {
+            const userId = await db.select("id", "user", "email_address = \"" + email + "\"");
+            let tok = token.make(userId);
+            res.status(SUCCESS).send({ token: tok});
+        } else {
+            res.status(FORBIDDEN).send({ error : 'Bad credentials'});
+        }
+    } else {
+        res.status(INT_ERR).send({ error: "Internal server error, please try again later"});
+    }
+}
+
+async function _deleteUser(req, res){
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    db.connect(conf.db_server);
+    //const userId = decoded.id[0].id;
+    const userId = 1;
+    let usr = await db.select("*", "user", "id = " + userId);
+    if(usr[0]){
+        usr = usr[0];
+        //DELETE
+        const achieveRes = await db.delete("achieve", "user_id = " + usr.id);
+        const surveyPreferencesRes = await db.delete("preference_survey", "survey_id = " + usr.survey_id);
+        const participateRes = await db.delete("participate", "user_id = " + usr.id);
+        const userRes = await db.delete("user", "id = " + usr.id);
+        const addressRes = await db.delete("address", "id = " + usr.address_id);
+        let workAddressRes;
+        if(usr.address_work != null){
+            workAddressRes = await db.delete("address", "id = " + usr.address_work);
+        } else {
+            workAddressRes = userRes;
+        }
+        const surveyRes = await db.delete("survey", "id = " + usr.survey_id);
+        if(achieveRes.errno || surveyPreferencesRes.errno || participateRes.errno || userRes.errno || addressRes.errno || workAddressRes.errno || surveyRes.errno ){
+            res.status(INT_ERR).send( {error: "Database delete error" } );
+            return;
+        }
+        res.status(SUCCESS).send({ result: "Data deleted successsfully" });
+    } else {
+        res.status(INT_ERR).send({ error: "User not found"});
+        return;
+    }
 }
 
 function _editUser(req, res){
@@ -111,5 +187,8 @@ Date.prototype.toMysqlFormat = function() {
 };
 
 module.exports = {
-    create: _createUser
+    create: _createUser,
+    getUser: _getUser,
+    login: _login,
+    delete: _deleteUser
 }

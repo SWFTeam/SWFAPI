@@ -24,7 +24,6 @@ INSERT INTO need (id) VALUES (null); #2
 INSERT INTO need (id) VALUES (null); #3
 INSERT INTO need (id) VALUES (null); #4
 INSERT INTO need (id) VALUES (null); #5
-INSERT INTO survey (id) VALUES (null); #1
 #INSERT INTO preference_survey (survey_id, need_id) VALUES (1, 1);
 #INSERT INTO description (country_code, title, description, need_id) 
 #    VALUES ("FR", "NOM NEED", "Je suis un test de description de l'entité hasBike", 1);
@@ -38,4 +37,23 @@ INSERT INTO description (country_code, title, description, type, foreign_id)
     VALUES("FR", "publicTransports", "Je suis une nouvelle version de la table pour tester", "need", 5);
 INSERT INTO description (country_code, title, description, type, foreign_id) 
     VALUES("FR", "aVelo", "Je suis une nouvelle version de la table pour tester", "need", 3);
+
+INSERT INTO address (id)
+    VALUES (1);
+INSERT INTO address (id)
+    VALUES (2);
+INSERT INTO survey (id)
+    VALUES (1);
+INSERT INTO user (id, firstname, lastname, email_address, password, birthday, address_id, survey_id, address_work)
+    VALUES (1, "julien", "guillan", "guillan.julien@live.com", "$2y$12$N4VBp1eda3Na7c.hkRyYmu.NWrv0JC1aHYc6aX60u0AzzaG/N4oZ6", NULL, 1, 1, NULL);
+INSERT INTO experience (id, exp)
+    VALUES (1, 50);
+INSERT INTO challenge (id, exp_id)
+    VALUES (1, 1);
+INSERT INTO achieve (user_id, chall_id)
+    VALUES (1, 1);
+INSERT INTO event (id, address_id, exp_id)
+    VALUES (1, 2, 1);
+INSERT INTO participate (user_id, event_id)
+    VALUES(1, 1);
 
