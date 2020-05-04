@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const users = require('./routes/users.js');
+const challenges = require('./routes/challenges.js');
 const log = console.log;
 const PORT = 3000;
 
@@ -25,3 +26,8 @@ app.get('/', (req, res) => {
 app.post('/signup', users.create);
 app.post('/signin', users.login);
 app.delete('/user', users.delete);
+
+/**
+ * CHALLENGE PART
+ */
+app.post('/challenge', challenges.create)
