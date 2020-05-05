@@ -119,6 +119,10 @@ async function _login(req, res){
         //GET PASSWORD HASH FROM DB
         db.connect(conf.db_server);
         const hashed = await db.select("password", "user", "email_address = \"" + email + "\"");
+        if(hashed.length == 0){
+            res.status(FORBIDDEN).send({ error : 'Bad credentials'});
+            return;
+        }
         const hash = hashed[0].password;
         if(bcrypt.compareSync(password, hash)) {
             const userId = await db.select("id", "user", "email_address = \"" + email + "\"");
