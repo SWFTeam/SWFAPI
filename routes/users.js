@@ -140,8 +140,7 @@ async function _deleteUser(req, res){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
     db.connect(conf.db_server);
-    //const userId = decoded.id[0].id;
-    const userId = 1;
+    const userId = decoded.id[0].id;
     let usr = await db.select("*", "user", "id = " + userId);
     if(usr[0]){
         usr = usr[0];
@@ -169,8 +168,25 @@ async function _deleteUser(req, res){
     }
 }
 
-function _editUser(req, res){
-
+async function _updateUser(req, res){
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    const userId = decoded.id[0].id;
+    db.connect(conf.db_server);
+    let attributes = null;
+    for(attr in req.body){
+        attributes == null ? attributes = attr + "=\"" + req.body[attr] + "\"" : attributes += "," + attr + "=\"" + attr[attr] + "\"";
+    }
+    const updateRes = await db.update(attributes, "user", "id=" + userId);
+    if(updateRes.errno){
+        res.status(INT_ERR).send( {error: "Database update error" } );
+        return;
+    }
+    res.status(SUCCESS).send({ result: "Data updated successsfully" });
 }
 //TBD
 function checkUser(user){
@@ -190,5 +206,6 @@ module.exports = {
     create: _createUser,
     getUser: _getUser,
     login: _login,
-    delete: _deleteUser
+    delete: _deleteUser,
+    update: _updateUser
 }

@@ -25,3 +25,4 @@ app.get('/', (req, res) => {
 app.post('/signup', users.create);
 app.post('/signin', users.login);
 app.delete('/user', users.delete);
+app.put('/user', users.update);

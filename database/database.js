@@ -52,13 +52,12 @@ async function _delete(table, where){
     }
 }
 
-async function _update(attribute, value, table, where){
+async function _update(attributes, table, where){
     try {
-        let sql = "UPDATE " + table + " SET " + attribute + " = " + value + " WHERE " + where;
+        let sql = "UPDATE " + table + " SET " + attributes + " WHERE " + where;
         let result = await asyncQuery(sql);
         return result;
     } catch(e){
-        console.error(e.sqlMessage);
         return e;
     }
 }
@@ -77,5 +76,6 @@ module.exports = {
     close: _close,
     insert: _insertInto,
     select: _select,
-    delete: _delete
+    delete: _delete,
+    update: _update
 }

@@ -45,7 +45,7 @@ INSERT INTO address (id)
 INSERT INTO survey (id)
     VALUES (1);
 INSERT INTO user (id, firstname, lastname, email_address, password, birthday, address_id, survey_id, address_work)
-    VALUES (1, "julien", "guillan", "guillan.julien@live.com", "$2y$12$N4VBp1eda3Na7c.hkRyYmu.NWrv0JC1aHYc6aX60u0AzzaG/N4oZ6", NULL, 1, 1, NULL);
+    VALUES (1, "julien", "guillan", "guillan.julien@live.com", "$2y$12$rTYcqAaglQHOtuPWGkzkoO8Am/KFXazsR9ToiUeeDzLBNeZMWORcu", NULL, 1, 1, NULL);
 INSERT INTO experience (id, exp)
     VALUES (1, 50);
 INSERT INTO challenge (id, exp_id)
