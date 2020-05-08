@@ -81,13 +81,19 @@ async function _getChallenge(req, res){
 
 async function _deleteChallenge(req, res){
     db.connect(conf.db_server);
-    if(req.body.id){
+    if(req.body){
         const challId = req.body.id;
-        //Delete from experience
-        
-        //Delete from preference_challenge
-        //Delete from challenge
-        //Delete from description
+        const expId = await db.select('exp_id', 'challenge', 'id=' + challId);
+
+        const prefRes = await db.delete('preference_challenge', 'chall_id=' + challId);
+        const challRes = await db.delete('challenge', 'id=' + challId);
+        const expRes = await db.delete('experience', 'id=' + expId[0].exp_id);
+        console.log(prefRes, challRes, expRes);
+        if(prefRes.errno || challRes.errno || expRes.errno){
+            res.status(INT_ERR).send("Something bac occurs, contact someone...");
+        } else {
+            res.status(SUCCESS).send("Challenge deleted successfully");
+        }
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
