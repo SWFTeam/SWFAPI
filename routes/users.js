@@ -102,7 +102,6 @@ async function _getUser(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    if(!db.connect(conf.db_server)) return;
     let user = await db.select("*", "user", "id = " + decoded.id);
     console.log(user);
     res.send("OK");
@@ -110,6 +109,7 @@ async function _getUser(req, res){
 
 
 async function _login(req, res){
+    db.connect(conf.db_server);
     if(req.body){
         const email = req.body.email;
         const password = req.body.password;
@@ -117,7 +117,6 @@ async function _login(req, res){
             res.status(BAD_REQUEST).send({error: "Missing email or password"});
         }
         //GET PASSWORD HASH FROM DB
-        db.connect(conf.db_server);
         const hashed = await db.select("password", "user", "email_address = \"" + email + "\"");
         if(hashed.length == 0){
             res.status(FORBIDDEN).send({ error : 'Bad credentials'});
@@ -134,16 +133,17 @@ async function _login(req, res){
     } else {
         res.status(INT_ERR).send({ error: "Internal server error, please try again later"});
     }
+    db.close();
 }
 
 async function _deleteUser(req, res){
+    db.connect(conf.db_server);
     const tok = req.get('Authorization');
     if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
     const decoded = await token.authenticate(req.headers.authorization);
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    db.connect(conf.db_server);
     const userId = decoded.id[0].id;
     let usr = await db.select("*", "user", "id = " + userId);
     if(usr[0]){
@@ -170,9 +170,11 @@ async function _deleteUser(req, res){
         res.status(INT_ERR).send({ error: "User not found"});
         return;
     }
+    db.close();
 }
 
 async function _updateUser(req, res){
+    db.connect(conf.db_server);
     const tok = req.get('Authorization');
     if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
     const decoded = await token.authenticate(req.headers.authorization);
@@ -180,7 +182,6 @@ async function _updateUser(req, res){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
     const userId = decoded.id[0].id;
-    db.connect(conf.db_server);
     let attributes = null;
     for(attr in req.body){
         attributes == null ? attributes = attr + "=\"" + req.body[attr] + "\"" : attributes += "," + attr + "=\"" + attr[attr] + "\"";
@@ -191,6 +192,7 @@ async function _updateUser(req, res){
         return;
     }
     res.status(SUCCESS).send({ result: "Data updated successsfully" });
+    db.close();
 }
 //TBD
 function checkUser(user){

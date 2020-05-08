@@ -4,9 +4,9 @@ let _con;
 function _connect(db_server){
     //console.log(db_server)
     _con = mysql.createConnection({
-        host: db_server.host || "localhost",
-        user: db_server.username || "root",
-        password: db_server.password || "root",
+        host: db_server.host || "localhost",
+        user: db_server.username || "root",
+        password: db_server.password || "root",
         database: db_server.database || "SWF"
     });
     _con.connect(function(err) {
@@ -52,12 +52,13 @@ async function _delete(table, where){
     }
 }
 
-async function _update(attributes, table, where){
+async function _update(attribute, value, table, where){
     try {
-        let sql = "UPDATE " + table + " SET " + attributes + " WHERE " + where;
+        let sql = "UPDATE " + table + " SET " + attribute + " = " + value + " WHERE " + where;
         let result = await asyncQuery(sql);
         return result;
     } catch(e){
+        console.error(e.sqlMessage);
         return e;
     }
 }
@@ -76,6 +77,5 @@ module.exports = {
     close: _close,
     insert: _insertInto,
     select: _select,
-    delete: _delete,
-    update: _update
+    delete: _delete
 }

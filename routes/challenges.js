@@ -5,7 +5,7 @@
 const db = require('../database/database.js');
 const conf = require('../database/conf.js');
 const token = require('../dist/token.js');
-
+const descrUtils = require('../dist/description.js');
 const SUCCESS = 200;
 const CREATED = 201;
 const UPDATED = 204;
@@ -17,15 +17,41 @@ const INT_ERR = 500;
 
 async function _createChallenge(req, res){
     db.connect(conf.db_server);
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    const userId = decoded.id[0].id;
     if(req.body){
         let challenge = req.body.challenge;
-        let needs = req.body.needs;
+        let descriptions = req.body.challenge.descriptions;
+        let needs = req.body.challenge.needs;
         //Insert into experience
         const expId = await db.insert("experience", "exp", [[challenge.experience]]);
         //Insert into challenge
         const challId = await db.insert("challenge", "exp_id", [[expId]]);
         //Insert into description
-        const descriptionId = await db.insert("description", "country_code, title, name, description, type, foreign_id", [[challenge.country_code, challenge.title, challenge.name, challenge.description, "challenge", challId]]);
+        descriptions.forEach(async (description) => {
+            description.foreign_id = challId;
+            const descriptionid = await descrUtils.insert(description);
+            if(descriptionId.errno){
+                let code = INT_ERR;
+                let message = "Something bad occurs, please try again later...";
+                switch(user_result.errno){
+                    case 1062:
+                        code = BAD_REQUEST;
+                        if(user_result.sqlMessage.indexOf("email") !== -1){
+                            message = "Email already exists";
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                res.status(code).send({ error: message})
+            }
+        });
         //Insert into preference_challenge
         let preference_challenge = [];
         for(need in needs){
@@ -46,6 +72,7 @@ async function _getChallenge(req, res){
     db.connect(conf.db_server);
     if(req.body.id){
         const challId = req.body.id;
+        //const chall = await db.select("*", "challenge");
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
@@ -57,6 +84,7 @@ async function _deleteChallenge(req, res){
     if(req.body.id){
         const challId = req.body.id;
         //Delete from experience
+        
         //Delete from preference_challenge
         //Delete from challenge
         //Delete from description
@@ -75,16 +103,6 @@ function _editChallenge(req, res){
     }
     db.close();
 }
-
-function twoDigits(d) {
-    if(0 <= d && d < 10) return "0" + d.toString();
-    if(-10 < d && d < 0) return "-0" + (-1*d).toString();
-    return d.toString();
-}
-
-Date.prototype.toMysqlFormat = function() {
-    return this.getUTCFullYear() + "-" + twoDigits(1 + this.getUTCMonth()) + "-" + twoDigits(this.getUTCDate()) + " " + twoDigits(this.getUTCHours()) + ":" + twoDigits(this.getUTCMinutes()) + ":" + twoDigits(this.getUTCSeconds());
-};
 
 module.exports = {
     create: _createChallenge,
