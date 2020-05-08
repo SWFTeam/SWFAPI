@@ -70,9 +70,13 @@ async function _createChallenge(req, res){
 
 async function _getChallenge(req, res){
     db.connect(conf.db_server);
-    if(req.body.id){
+    if(req.body){
         const challId = req.body.id;
-        //const chall = await db.select("*", "challenge");
+        const chall = await db.select("*", "challenge");
+        /*res.status(SUCCESS).send({ challenge: {
+            id: challId[0].id,
+
+        }})*/
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
@@ -87,7 +91,9 @@ async function _deleteChallenge(req, res){
 
         const prefRes = await db.delete('preference_challenge', 'chall_id=' + challId);
         const challRes = await db.delete('challenge', 'id=' + challId);
-        const expRes = await db.delete('experience', 'id=' + expId[0].exp_id);
+        let expRes = "null";
+        if(expId[0]) expRes = await db.delete('experience', 'id=' + expId[0].exp_id);
+        const descRes = await db.delete('description', 'foreign_id=' + challId + " AND type=\"challenge\"");
         console.log(prefRes, challRes, expRes);
         if(prefRes.errno || challRes.errno || expRes.errno){
             res.status(INT_ERR).send("Something bac occurs, contact someone...");
