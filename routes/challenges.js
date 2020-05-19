@@ -1,5 +1,5 @@
 /**
- * ROUTES FOR USER MANIPULATIONS
+ * ROUTES FOR CHALLENGES MANIPULATIONS
  */
 
 const db = require('../database/database.js');
