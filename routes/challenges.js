@@ -36,20 +36,20 @@ async function _createChallenge(req, res){
         descriptions.forEach(async (description) => {
             description.foreign_id = challId;
             const descriptionid = await descrUtils.insert(description);
-            if(descriptionId.errno){
+            //console.log(descriptionid.errno);
+            if(descriptionid.errno){
                 let code = INT_ERR;
                 let message = "Something bad occurs, please try again later...";
-                switch(user_result.errno){
+                switch(descriptionid.errno){
                     case 1062:
                         code = BAD_REQUEST;
-                        if(user_result.sqlMessage.indexOf("email") !== -1){
-                            message = "Email already exists";
-                        }
+                        message = "Duplicate entry for challenge";
                         break;
                     default:
                         break;
                 }
-                res.status(code).send({ error: message})
+                res.status(code).send({ error: message});
+                return;
             }
         });
         //Insert into preference_challenge
@@ -70,13 +70,26 @@ async function _createChallenge(req, res){
 
 async function _getChallenge(req, res){
     db.connect(conf.db_server);
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    const userId = decoded.id[0].id;
     if(req.body){
         const challId = req.body.id;
-        const chall = await db.select("*", "challenge");
-        /*res.status(SUCCESS).send({ challenge: {
-            id: challId[0].id,
-
-        }})*/
+        const chall = await db.select("*", "challenge", "id=" + challId);
+        const descriptions = await db.select("*", "description", "foreign_id=" + challId + " AND type=\"challenge\"");
+        let descrs = [];
+        descriptions.forEach(description => {
+            descrs.push(description);
+        })
+        const challenge = {
+            id: challId,
+            descriptions: descrs
+        }
+        res.status(SUCCESS).send({ challenge });
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
@@ -85,6 +98,13 @@ async function _getChallenge(req, res){
 
 async function _deleteChallenge(req, res){
     db.connect(conf.db_server);
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    const userId = decoded.id[0].id;
     if(req.body){
         const challId = req.body.id;
         const expId = await db.select('exp_id', 'challenge', 'id=' + challId);
@@ -94,14 +114,13 @@ async function _deleteChallenge(req, res){
         let expRes = "null";
         if(expId[0]) expRes = await db.delete('experience', 'id=' + expId[0].exp_id);
         const descRes = await db.delete('description', 'foreign_id=' + challId + " AND type=\"challenge\"");
-        console.log(prefRes, challRes, expRes);
         if(prefRes.errno || challRes.errno || expRes.errno){
-            res.status(INT_ERR).send("Something bac occurs, contact someone...");
+            res.status(INT_ERR).send({ status: "Something bad occurs, contact someone..." });
         } else {
-            res.status(SUCCESS).send("Challenge deleted successfully");
+            res.status(SUCCESS).send({ status: "Challenge deleted successfully" });
         }
     } else {
-        res.status(INT_ERR).send("Something bad occurs, please try again later...");
+        res.status(INT_ERR).send({ status: "Something bad occurs, contact someone..." });
     }
     db.close();
 }
@@ -118,7 +137,7 @@ function _editChallenge(req, res){
 
 module.exports = {
     create: _createChallenge,
-    getChallenge: _getChallenge,
+    get: _getChallenge,
     delete: _deleteChallenge,
     edit: _editChallenge
 }

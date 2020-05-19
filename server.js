@@ -31,5 +31,6 @@ app.put('/user', users.update);
 /**
  * CHALLENGE PART
  */
+app.get('/challenge', challenges.get);
 app.post('/challenge', challenges.create);
 app.delete('/challenge', challenges.delete);

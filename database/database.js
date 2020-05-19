@@ -32,7 +32,10 @@ async function _insertInto(table, attributes, data){
 
 async function _select(attributes, table, where){
     try {
-        let sql = "SELECT " + attributes + " FROM " + table  +  " WHERE " + where;
+        let sql = "SELECT " + attributes + " FROM " + table;
+        if(where){
+            sql += " WHERE " + where;
+        }
         let result = await asyncQuery(sql);
         return result;
     } catch(e) {
