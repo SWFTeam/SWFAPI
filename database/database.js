@@ -92,5 +92,6 @@ module.exports = {
     close: _close,
     insert: _insertInto,
     select: _select,
-    delete: _delete
+    delete: _delete,
+    update: _update
 }

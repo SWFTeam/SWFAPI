@@ -3,6 +3,7 @@ const app = express();
 const users = require('./routes/users.js');
 const challenges = require('./routes/challenges.js');
 const events = require('./routes/events.js');
+const advices = require('./routes/advices.js');
 const log = console.log;
 const PORT = 3000;
 
@@ -36,12 +37,17 @@ app.get('/challenge', challenges.get);
 app.post('/challenge', challenges.create);
 app.delete('/challenge', challenges.delete);
 
-
 /**
  * EVENT PART
  */
+app.post('/event', events.create);
+app.get('/event', events.get);
+app.delete('/event', events.delete);
 
- //app.get('/event', events.get);
- app.post('/event', events.create);
- app.get('/event', events.get);
- app.delete('/event', events.delete);
+/**
+ * ADVICE PART
+ */
+app.post('/advice', advices.create);
+app.delete('/advice', advices.delete);
+app.put('/advice', advices.edit);
+app.get('/advice', advices.getAdvice);
