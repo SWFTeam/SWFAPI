@@ -22,7 +22,8 @@ async function _createAdvice(req, res){
     const decoded = await token.authenticate(req.headers.authorization);
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
-    }*/
+    }
+    const userId = decoded.id[0].id;*/
 
     db.connect(conf.db_server);
     if(req.body){
@@ -67,7 +68,8 @@ async function _getAdvice(req, res){
     const decoded = await token.authenticate(req.headers.authorization);
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
-    }*/
+    }
+    const userId = decoded.id[0].id;*/
     db.connect(conf.db_server);
     if(req.body.id){
         let adviceId = req.body.id;
@@ -96,12 +98,29 @@ async function _deleteAdvice(req, res){
     const decoded = await token.authenticate(req.headers.authorization);
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
-    }*/
+    }
+    const userId = decoded.id[0].id;*/
+    db.connect(conf.db_server);
     if(req.body.id){
         let adviceId = req.body.id;
+        const prefRes = await db.delete('preference_advice', 'advice_id=' + adviceId);
+        if(prefRes.errno){
+            res.status(INT_ERR).send({ error: "Something bad occurs, please try again later..."})
+        }
+        const descRes = await db.delete('description', 'foreign_id=' + adviceId + " AND type=\"advice\"");
+        if(descRes.errno){
+            res.status(INT_ERR).send({ error: "Something bad occurs, please try again later..."})
+        }
+        const adviceRes = await db.delete('advice', 'id=' + adviceId);
+        if(adviceRes.errno){
+            res.status(INT_ERR).send({ error: "Something bad occurs, please try again later..."})
+        }
+        res.status(SUCCESS).send({ message: "Data successfully deleted." });
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
+
+    db.close();
 }
 
 function _editAdvice(req, res){
@@ -111,13 +130,17 @@ function _editAdvice(req, res){
     const decoded = await token.authenticate(req.headers.authorization);
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
-    }*/
+    }
+    const userId = decoded.id[0].id;*/
+    db.connect(conf.db_server);
     if(req.body){
         let advice = req.body.advice;
         let adviceId = advice.id;
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
+
+    db.close();
 }
 
 module.exports = {
