@@ -17,13 +17,13 @@ const INT_ERR = 500;
 
 async function _createAdvice(req, res){
     //Token VERIF
-    /*const tok = req.get('Authorization');
+    const tok = req.get('Authorization');
     if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
     const decoded = await token.authenticate(req.headers.authorization);
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;*/
+    const userId = decoded.id[0].id;
 
     db.connect(conf.db_server);
     if(req.body){
@@ -63,13 +63,13 @@ async function _createAdvice(req, res){
 
 async function _getAdvice(req, res){
     //Token VERIF
-    /*const tok = req.get('Authorization');
+    const tok = req.get('Authorization');
     if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
     const decoded = await token.authenticate(req.headers.authorization);
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;*/
+    const userId = decoded.id[0].id;
     db.connect(conf.db_server);
     if(req.body.id){
         let adviceId = req.body.id;
@@ -93,13 +93,13 @@ async function _getAdvice(req, res){
 
 async function _deleteAdvice(req, res){
     //Token VERIF
-    /*const tok = req.get('Authorization');
+    const tok = req.get('Authorization');
     if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
     const decoded = await token.authenticate(req.headers.authorization);
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;*/
+    const userId = decoded.id[0].id;
     db.connect(conf.db_server);
     if(req.body.id){
         let adviceId = req.body.id;
@@ -123,15 +123,15 @@ async function _deleteAdvice(req, res){
     db.close();
 }
 
-function _editAdvice(req, res){
+async function _editAdvice(req, res){
     //Token VERIF
-    /*const tok = req.get('Authorization');
+    const tok = req.get('Authorization');
     if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
     const decoded = await token.authenticate(req.headers.authorization);
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;*/
+    const userId = decoded.id[0].id;
     db.connect(conf.db_server);
     if(req.body){
         let adviceId = req.body.id;
