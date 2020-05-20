@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const users = require('./routes/users.js');
 const challenges = require('./routes/challenges.js');
+const advices = require('./routes/advices.js');
 const log = console.log;
 const PORT = 3000;
 
@@ -33,3 +34,11 @@ app.put('/user', users.update);
  */
 app.post('/challenge', challenges.create);
 app.delete('/challenge', challenges.delete);
+
+/**
+ * ADVICE PART
+ */
+app.post('/advice', advices.create);
+app.delete('/advice', advices.delete);
+app.put('/advice', advices.edit);
+app.get('/advice', advices.getAdvice);
