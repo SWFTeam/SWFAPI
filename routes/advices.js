@@ -56,6 +56,8 @@ async function _createAdvice(req, res){
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
+
+    db.close();
 }
 
 async function _getAdvice(req, res){
@@ -66,14 +68,25 @@ async function _getAdvice(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }*/
+    db.connect(conf.db_server);
     if(req.body.id){
         let adviceId = req.body.id;
-        const advice = await db.select("*", "challenge");
-        res.status(SUCCESS).send({ advice: advice });
+        //const advice = await db.select("*", "advice", "id=" + adviceId);
+        const descriptions = await db.select("*", "description", "foreign_id=" + adviceId + " AND type=\"advice\"");
+        let descrs = [];
+        descriptions.forEach(description => {
+            descrs.push(description);
+        })
+        const adviceResult = {
+            id: adviceId,
+            descriptions: descrs
+        }
+        res.status(SUCCESS).send({ adviceResult });
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
 
+    db.close();
 }
 
 async function _deleteAdvice(req, res){
