@@ -26,7 +26,33 @@ async function _createAdvice(req, res){
 
     db.connect(conf.db_server);
     if(req.body){
-        let advice = req.body.advice;
+        let descriptions = req.body.descriptions;
+        let needs = req.body.needs;
+
+        //Insert into Advice
+        const adviceId = await db.insert("advice", "", [[]]);
+        
+        //Insert into description
+        descriptions.forEach(async (description) => {
+            description.foreign_id = adviceId;
+            const descriptionId = await descrUtils.insert(description);
+            if(descriptionId.errno){
+                let code = INT_ERR;
+                let message = "Something bad occurs, please try again later...";
+                res.status(code).send({ error: message})
+            }
+        });
+
+        //Insert into preference_advice
+        let preference_advice = [];
+        for(need in needs){
+            if(needs[need]){
+                let needId = await db.select("need.id", "need JOIN description on need.id = description.foreign_id", "country_code = \"GB\" AND title=\"" + String(need) + "\"");
+                preference_advice.push([adviceId, needId[0].id]);
+            }
+        }
+        await db.insert("preference_advice", "advice_id, need_id", preference_advice);
+        res.status(SUCCESS).send({ result: "Data inserted successsfully" });
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
