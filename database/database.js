@@ -55,9 +55,21 @@ async function _delete(table, where){
     }
 }
 
-async function _update(attribute, value, table, where){
+async function _update(attributes, values, table, where){
     try {
-        let sql = "UPDATE " + table + " SET " + attribute + " = " + value + " WHERE " + where;
+        let i = 0;
+        let sql = "UPDATE " + table + " SET ";
+        attributes.forEach(async (attribute) => {
+            if(i==0){
+                sql += attribute + "=\"" + values[0][i] + "\""
+            } else {
+                sql += ", " + attribute + "=\"" + values[0][i] +"\""
+            }
+            i++;
+        });
+        if(where){
+            sql += " where " + where;
+        }
         let result = await asyncQuery(sql);
         return result;
     } catch(e){
