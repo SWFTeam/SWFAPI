@@ -134,8 +134,16 @@ function _editAdvice(req, res){
     const userId = decoded.id[0].id;*/
     db.connect(conf.db_server);
     if(req.body){
-        let advice = req.body.advice;
-        let adviceId = advice.id;
+        let adviceId = req.body.id;
+        let descriptions = req.body.descriptions;
+        descriptions.forEach(async (description) => {
+            description.foreign_id = adviceId;
+            const descriptionRes = await descrUtils.update(description);
+            if(descriptionRes.errno){
+                res.status(INT_ERR).send({ error: "Something bad occurs, please try again later..."})
+            }
+        });
+        res.status(SUCCESS).send({ message: "Data successfully updated." });
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
