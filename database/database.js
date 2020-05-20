@@ -4,9 +4,9 @@ let _con;
 function _connect(db_server){
     //console.log(db_server)
     _con = mysql.createConnection({
-        host: db_server.host || "localhost",
-        user: db_server.username || "root",
-        password: db_server.password || "root",
+        host: db_server.host || "localhost",
+        user: db_server.username || "root",
+        password: db_server.password || "root",
         database: db_server.database || "SWF"
     });
     _con.connect(function(err) {
@@ -32,7 +32,7 @@ async function _insertInto(table, attributes, data){
 
 async function _select(attributes, table, where){
     try {
-        let sql = "SELECT " + attributes + " FROM " + table  +  " WHERE " + where;
+        let sql = "SELECT " + attributes + " FROM " + table +  " WHERE " + where;
         let result = await asyncQuery(sql);
         return result;
     } catch(e) {
@@ -52,12 +52,25 @@ async function _delete(table, where){
     }
 }
 
-async function _update(attributes, table, where){
+async function _update(attributes, values, table, where){
     try {
-        let sql = "UPDATE " + table + " SET " + attributes + " WHERE " + where;
+        let i = 0;
+        let sql = "UPDATE " + table + " SET ";
+        attributes.forEach(async (attribute) => {
+            if(i==0){
+                sql += attribute + "=\"" + values[0][i] + "\""
+            } else {
+                sql += ", " + attribute + "=\"" + values[0][i] +"\""
+            }
+            i++;
+        });
+        if(where){
+            sql += " where " + where;
+        }
         let result = await asyncQuery(sql);
         return result;
     } catch(e){
+        console.error(e.sqlMessage);
         return e;
     }
 }

@@ -181,11 +181,13 @@ async function _updateUser(req, res){
     }
     const userId = decoded.id[0].id;
     db.connect(conf.db_server);
-    let attributes = null;
+    let attributes = [];
+    let values = [];
     for(attr in req.body){
-        attributes == null ? attributes = attr + "=\"" + req.body[attr] + "\"" : attributes += "," + attr + "=\"" + attr[attr] + "\"";
+        attributes.push(attr);
+        values.push(req.body[attr]);
     }
-    const updateRes = await db.update(attributes, "user", "id=" + userId);
+    const updateRes = await db.update(attributes, values, "user", "id=" + userId);
     if(updateRes.errno){
         res.status(INT_ERR).send( {error: "Database update error" } );
         return;
