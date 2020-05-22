@@ -33,7 +33,7 @@ async function _insertInto(table, attributes, data){
 
 async function _select(attributes, table, where){
     try {
-        _insertRequest(table, "select");
+        let insertedRequest = await _insertRequest(table, "select");
         let sql = "SELECT " + attributes + " FROM " + table;
         if(where){
             sql += " WHERE " + where;
@@ -48,7 +48,7 @@ async function _select(attributes, table, where){
 
 async function _delete(table, where){
     try {
-        _insertRequest(table, "delete");
+        let insertedRequest = await _insertRequest(table, "delete");
         let sql = "DELETE FROM " + table + " WHERE " + where;
         let result = await asyncQuery(sql);
         return result;
@@ -60,7 +60,7 @@ async function _delete(table, where){
 
 async function _update(attributes, values, table, where){
     try {
-        _insertRequest(table, "update");
+        let insertedRequest = await _insertRequest(table, "update");
         let i = 0;
         let sql = "UPDATE " + table + " SET ";
         attributes.forEach(async (attribute) => {
