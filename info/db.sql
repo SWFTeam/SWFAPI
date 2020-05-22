@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS preference_advice (
     PRIMARY KEY (advice_id, need_id)
 );
 
-CREATE TABLE IF NOT EXISTS description(
+CREATE TABLE IF NOT EXISTS description (
     id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     country_code VARCHAR(3),
     title VARCHAR(100) UNIQUE,
@@ -140,4 +140,12 @@ CREATE TABLE IF NOT EXISTS description(
     #FOREIGN KEY (chall_id) REFERENCES challenge(id),
     #FOREIGN KEY (event_id) REFERENCES event(id),
     #FOREIGN KEY (advice_id) REFERENCES advice(id)
+);
+
+CREATE TABLE IF NOT EXISTS request (
+    id INT NOT NULL AUTO_INCREMENT,
+    entity VARCHAR(25),
+    type VARCHAR(25),
+    date DATE,
+    PRIMARY KEY (id)
 );
