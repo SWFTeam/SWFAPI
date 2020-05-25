@@ -83,7 +83,7 @@ async function _getChallenge(req, res){
         const descriptions = await db.select("*", "description", "foreign_id=" + challId + " AND type=\"challenge\"");
         let descrs = [];
         descriptions.forEach(description => {
-            descrs.push(description.toJson());
+            descrs.push(description);
         })
         const challenge = {
             id: challId,
@@ -125,10 +125,54 @@ async function _deleteChallenge(req, res){
     db.close();
 }
 
-function _editChallenge(req, res){
+async function _updateChallenge(req, res){
+    //Token VERIF
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    const userId = decoded.id[0].id;
     db.connect(conf.db_server);
-    if(req.body.id){
-        const challId = req.body.id;
+    if(req.body){
+        let challengeId = req.body.challenge.id;
+        let descriptions = req.body.challenge.descriptions;
+        descriptions.forEach(async (description) => {
+            description.foreign_id = challengeId;
+            const descriptionRes = await descrUtils.update(description);
+            if(descriptionRes.errno){
+                res.status(INT_ERR).send({ error: "Something bad occurs, please try again later..."});
+                return;
+            }
+        });
+        let needs = req.body.challenge.needs;
+        for(attr in needs){
+            if(needs[attr] == true){
+                const needsId = await db.select("need_id", "preference_challenge", "chall_id=" + challengeId);
+                const needDescr = await db.select("*", "description", "title=\"" + attr + "\" AND type=\"need\"");
+                needsId.forEach(id => {
+                    console.log(needDescr)
+                    if(id.need_id == needDescr[0].foreign_id){
+                        
+                    }
+                })
+            }
+        }
+        let challengeAttributes = [];
+        let challengeValues = [];
+        for(attr in req.body.challenge){
+            if(attr != "descriptions" &&  attr != "experience" && attr != "needs"){
+                challengeValues.push(req.body.challenge[attr]);
+                challengeAttributes.push(attr);
+            }
+        }
+        const challengeRes = await db.update(challengeAttributes, [challengeValues], "challenge", "id=" + challengeId);
+        if(challengeRes.errno){
+            res.status(BAD_REQUEST).send({ message: "Bad request please check request's body " + challengeRes.errno });
+            return;
+        }
+        res.status(SUCCESS).send({ message: "Data updated successfully" });
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
@@ -139,5 +183,5 @@ module.exports = {
     create: _createChallenge,
     get: _getChallenge,
     delete: _deleteChallenge,
-    edit: _editChallenge
+    put: _updateChallenge
 }

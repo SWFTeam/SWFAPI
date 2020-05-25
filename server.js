@@ -29,6 +29,7 @@ app.post('/signup', users.create);
 app.post('/signin', users.login);
 app.delete('/user', users.delete);
 app.put('/user', users.update);
+app.post('/bo/signin', users.login);
 
 /**
  * CHALLENGE PART
@@ -36,6 +37,7 @@ app.put('/user', users.update);
 app.get('/challenge', challenges.get);
 app.post('/challenge', challenges.create);
 app.delete('/challenge', challenges.delete);
+app.put('/challenge', challenges.put);
 
 /**
  * EVENT PART
@@ -43,6 +45,7 @@ app.delete('/challenge', challenges.delete);
 app.post('/event', events.create);
 app.get('/event', events.get);
 app.delete('/event', events.delete);
+app.put('/event', events.put);
 
 /**
  * ADVICE PART

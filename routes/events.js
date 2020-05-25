@@ -46,7 +46,6 @@ async function _createEvent(req, res){
         descriptions.forEach(async (description) => {
             description.foreign_id = eventId;
             const descriptionid = await descrUtils.insert(description);
-            //console.log(descriptionid.errno);
             if(descriptionid.errno){
                 let code = INT_ERR;
                 let message = "Something bad occurs, please try again later...";
@@ -132,8 +131,67 @@ async function _deleteEvent(req, res){
     db.close();
 }
 
+async function _updateEvent(req, res){
+    //Token VERIF
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    const userId = decoded.id[0].id;
+    db.connect(conf.db_server);
+    if(req.body){
+        let eventId = req.body.event.id;
+        let descriptions = req.body.event.descriptions;
+        let address = req.body.event.address;
+        const addressId = req.body.event.address.id;
+        descriptions.forEach(async (description) => {
+            description.foreign_id = eventId;
+            const descriptionRes = await descrUtils.update(description);
+            if(descriptionRes.errno){
+                res.status(INT_ERR).send({ error: "Something bad occurs, please try again later..."});
+                return;
+            }
+        });
+        let attributes = [];
+        let values = [];
+        for(attr in address){
+            values.push(address[attr]);
+            attributes.push(attr);
+        }
+        const addressRes = await db.update(attributes, [values], "address", "id=" + addressId);
+        if(addressRes.errno){
+            res.status(BAD_REQUEST).send({ message: "Bad request, please check the request's body" });
+            return;
+        }
+        let eventAttributes = [];
+        let eventValues = [];
+        for(attr in req.body.event){
+            if(attr != "descriptions" && attr != "address" && attr != "experience"){
+                if(attr == "date_start" || attr == "date_end"){
+                    eventValues.push(new Date(req.body.event[attr]).toMysqlFormat());
+                } else {
+                    eventValues.push(req.body.event[attr]);
+                }
+                eventAttributes.push(attr);
+            }
+        }
+        const eventRes = await db.update(eventAttributes, [eventValues], "event", "id=" + eventId);
+        if(eventRes.errno){
+            res.status(BAD_REQUEST).send({ message: "Bad request please check request's body " + eventRes.errno });
+            return;
+        }
+        res.status(SUCCESS).send({ message: "Data updated successfully" });
+    } else {
+        res.status(INT_ERR).send("Something bad occurs, please try again later...");
+    }
+    db.close();
+}
+
 module.exports = {
     create: _createEvent,
     get: _getEvent,
-    delete: _deleteEvent
+    delete: _deleteEvent,
+    put: _updateEvent
 }

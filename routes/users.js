@@ -124,8 +124,14 @@ async function _login(req, res){
         }
         const hash = hashed[0].password;
         if(bcrypt.compareSync(password, hash)) {
-            const userId = await db.select("id", "user", "email_address = \"" + email + "\"");
-            let tok = token.make(userId);
+            const userId = await db.select("id, isAdmin", "user", "email_address = \"" + email + "\"");
+            let tok = token.make(userId[0].id);
+            if(req.originalUrl == '/bo/signin'){
+                if(userId[0].isAdmin == 1){
+                    res.status(SUCCESS).send({ token: tok, access_bo: true });
+                    return;
+                }
+            }
             res.status(SUCCESS).send({ token: tok});
         } else {
             res.status(FORBIDDEN).send({ error : 'Bad credentials'});
