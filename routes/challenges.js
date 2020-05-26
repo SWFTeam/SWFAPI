@@ -68,6 +68,35 @@ async function _createChallenge(req, res){
     db.close();
 }
 
+async function _getAllChallenges(req, res){
+    db.connect(conf.db_server);
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    const userId = decoded.id;
+    if(req.body){
+        let challenges = [];
+        const challs = await db.select("*", "challenge");
+        for(chall of challs){
+            let descriptions = [];
+            let description = await db.select("*", "description", "type='challenge' AND foreign_id=" + chall.id);
+            descriptions.push(description);
+            challenges.push({
+                id: chall.id,
+                descriptions: descriptions
+            });
+        };
+        if(challs.errno){
+            res.status(INT_ERR).send({ error: "Internal server error." });
+            return;
+        }
+        res.status(SUCCESS).send(challenges);
+    }
+}
+
 async function _getChallenge(req, res){
     db.connect(conf.db_server);
     const tok = req.get('Authorization');
@@ -182,6 +211,7 @@ async function _updateChallenge(req, res){
 module.exports = {
     create: _createChallenge,
     get: _getChallenge,
+    getAllChallenges: _getAllChallenges,
     delete: _deleteChallenge,
     put: _updateChallenge
 }

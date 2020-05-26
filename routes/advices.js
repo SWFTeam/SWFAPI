@@ -61,6 +61,35 @@ async function _createAdvice(req, res){
     db.close();
 }
 
+async function _getAllAdvices(req, res){
+    db.connect(conf.db_server);
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    const userId = decoded.id;
+    if(req.body){
+        let advices = [];
+        const advs = await db.select("*", "advice");
+        for(advice of advs){
+            let descriptions = [];
+            let description = await db.select("*", "description", "type='advice' AND foreign_id=" + advice.id);
+            descriptions.push(description);
+            advices.push({
+                id: advice.id,
+                descriptions: descriptions
+            });
+        };
+        if(advs.errno){
+            res.status(INT_ERR).send({ error: "Internal server error." });
+            return;
+        }
+        res.status(SUCCESS).send(advices);
+    }
+}
+
 async function _getAdvice(req, res){
     //Token VERIF
     const tok = req.get('Authorization');
@@ -154,6 +183,7 @@ async function _editAdvice(req, res){
 module.exports = {
     create: _createAdvice,
     getAdvice: _getAdvice,
+    getAllAdvices: _getAllAdvices,
     delete: _deleteAdvice,
     edit: _editAdvice
 }

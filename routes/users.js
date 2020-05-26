@@ -107,6 +107,24 @@ async function _getUser(req, res){
     res.send("OK");
 }
 
+async function _getAllUsers(req, res){
+    db.connect(conf.db_server);
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    const userId = decoded.id;
+    if(req.body){
+        const users = await db.select("*", "user");
+        if(users.errno){
+            res.status(INT_ERR).send({ error: "Internal server error." });
+            return;
+        }
+        res.status(SUCCESS).send(users);
+    }
+}
 
 async function _login(req, res){
     db.connect(conf.db_server);
@@ -220,6 +238,7 @@ Date.prototype.toMysqlFormat = function() {
 module.exports = {
     create: _createUser,
     getUser: _getUser,
+    getAllUsers: _getAllUsers,
     login: _login,
     delete: _deleteUser,
     update: _updateUser

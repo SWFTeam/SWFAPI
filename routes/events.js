@@ -104,6 +104,40 @@ async function _getEvent(req, res){
     }
 }
 
+async function _getAllEvents(req, res){
+    db.connect(conf.db_server);
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    const userId = decoded.id;
+    if(req.body){
+        let events = [];
+        const evts = await db.select("*", "event");
+        for(evt of evts){
+            let descriptions = [];
+            let description = await db.select("*", "description", "type='event' AND foreign_id=" + evt.id);
+            let address = await db.select("*", "address", "id=" + evt.address_id);
+            descriptions.push(description);
+            console.log(evt);
+            events.push({
+                id: evt.id,
+                address: address,
+                date_start: evt.date_start,
+                date_end: evt.date_end,
+                descriptions: descriptions
+            });
+        };
+        if(evts.errno){
+            res.status(INT_ERR).send({ error: "Internal server error." });
+            return;
+        }
+        res.status(SUCCESS).send(events);
+    }
+}
+
 async function _deleteEvent(req, res){
     db.connect(conf.db_server);
     const tok = req.get('Authorization');
@@ -192,6 +226,7 @@ async function _updateEvent(req, res){
 module.exports = {
     create: _createEvent,
     get: _getEvent,
+    getAllEvents: _getAllEvents,
     delete: _deleteEvent,
     put: _updateEvent
 }

@@ -30,11 +30,13 @@ app.post('/signin', users.login);
 app.delete('/user', users.delete);
 app.put('/user', users.update);
 app.post('/bo/signin', users.login);
+app.get('/bo/users', users.getAllUsers);
 
 /**
  * CHALLENGE PART
  */
 app.get('/challenge', challenges.get);
+app.get('/bo/challenges', challenges.getAllChallenges);
 app.post('/challenge', challenges.create);
 app.delete('/challenge', challenges.delete);
 app.put('/challenge', challenges.put);
@@ -43,6 +45,7 @@ app.put('/challenge', challenges.put);
  * EVENT PART
  */
 app.post('/event', events.create);
+app.get('/bo/events', events.getAllEvents);
 app.get('/event', events.get);
 app.delete('/event', events.delete);
 app.put('/event', events.put);
@@ -54,3 +57,4 @@ app.post('/advice', advices.create);
 app.delete('/advice', advices.delete);
 app.put('/advice', advices.edit);
 app.get('/advice', advices.getAdvice);
+app.get('/bo/advices', advices.getAllAdvices);
