@@ -4,6 +4,7 @@ const users = require('./routes/users.js');
 const challenges = require('./routes/challenges.js');
 const events = require('./routes/events.js');
 const advices = require('./routes/advices.js');
+const addresses = require('./routes/addresses.js');
 const log = console.log;
 const PORT = 3000;
 
@@ -58,3 +59,8 @@ app.delete('/advice', advices.delete);
 app.put('/advice', advices.edit);
 app.get('/advice', advices.getAdvice);
 app.get('/bo/advices', advices.getAllAdvices);
+
+/**
+ * ADDRESS PART
+ */
+app.get('/addresses/:id', addresses.getById);
