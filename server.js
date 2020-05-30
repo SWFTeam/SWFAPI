@@ -32,6 +32,7 @@ app.delete('/user', users.delete);
 app.put('/user', users.update);
 app.post('/bo/signin', users.login);
 app.get('/bo/users', users.getAllUsers);
+app.post('/bo/user', users.getUser);
 
 /**
  * CHALLENGE PART

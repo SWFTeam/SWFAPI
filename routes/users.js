@@ -96,15 +96,20 @@ async function _createUser(req, res){
 }
 
 async function _getUser(req, res){
+    db.connect(conf.db_server)
     const tok = req.get('Authorization');
     if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
     const decoded = await token.authenticate(req.headers.authorization);
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    let user = await db.select("*", "user", "id = " + decoded.id);
-    console.log(user);
-    res.send("OK");
+    let user = await db.select("firstname, lastname, isAdmin", "user", "email_address='" + req.body.email + "'");
+    if(!user.errno){
+        res.status(SUCCESS).send(user[0]);
+    } else {
+        res.status(BAD_REQUEST).send({ error: "An error occured, please try again." });
+    }
+    return;
 }
 
 async function _getAllUsers(req, res){
