@@ -64,6 +64,9 @@ async function _createUser(req, res){
             attributes == null ? attributes = attr : attributes += "," + attr;
             user.push(usr[attr]);
         }
+        attributes += ', created_at';
+        let now = new Date().toMysqlFormat()
+        user.push(now);
         const user_result = await db.insert("user", attributes, [user]);
         if(user_result.errno === undefined){
             res.status(CREATED).send(
@@ -103,7 +106,7 @@ async function _getUser(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    let user = await db.select("firstname, lastname, isAdmin, last_login_at", "user", "email_address='" + req.body.email + "'");
+    let user = await db.select("firstname, lastname, isAdmin, last_login_at, created_at", "user", "email_address='" + req.body.email + "'");
     if(!user.errno){
         res.status(SUCCESS).send(user[0]);
     } else {
