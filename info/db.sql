@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS user (
     survey_id INT NOT NULL,
     address_work INT NULL,
     isAdmin INT NULL,
+    last_login_at DATETIME,
 #   info_id INT NULL,
     FOREIGN KEY (address_id) REFERENCES address(id),
     FOREIGN KEY (survey_id) REFERENCES survey(id),

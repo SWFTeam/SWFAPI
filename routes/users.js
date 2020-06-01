@@ -103,7 +103,7 @@ async function _getUser(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    let user = await db.select("firstname, lastname, isAdmin", "user", "email_address='" + req.body.email + "'");
+    let user = await db.select("firstname, lastname, isAdmin, last_login_at", "user", "email_address='" + req.body.email + "'");
     if(!user.errno){
         res.status(SUCCESS).send(user[0]);
     } else {
@@ -148,6 +148,12 @@ async function _login(req, res){
         const hash = hashed[0].password;
         if(bcrypt.compareSync(password, hash)) {
             const userId = await db.select("id, isAdmin", "user", "email_address = \"" + email + "\"");
+            let last_login = new Date().toMysqlFormat();
+            let tmp_last = []
+            tmp_last.push(last_login)
+            console.log(tmp_last)
+            const insert_status = await db.update(['last_login_at'], [tmp_last], "user", "id=" + userId[0].id)
+            console.log(insert_status)
             let tok = token.make(userId[0].id);
             if(req.originalUrl == '/bo/signin'){
                 if(userId[0].isAdmin == 1){
