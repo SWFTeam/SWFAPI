@@ -23,7 +23,6 @@ async function _createChallenge(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
     if(req.body){
         let challenge = req.body.challenge;
         let descriptions = req.body.challenge.descriptions;
@@ -105,7 +104,6 @@ async function _getChallenge(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
     if(req.body){
         const challId = req.body.id;
         const chall = await db.select("*", "challenge", "id=" + challId);

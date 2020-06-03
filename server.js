@@ -5,6 +5,7 @@ const challenges = require('./routes/challenges.js');
 const events = require('./routes/events.js');
 const advices = require('./routes/advices.js');
 const addresses = require('./routes/addresses.js');
+const status = require('./routes/status.js');
 const log = console.log;
 const PORT = 3000;
 
@@ -37,7 +38,7 @@ app.post('/bo/user', users.getUser);
 /**
  * CHALLENGE PART
  */
-app.get('/challenge', challenges.get);
+app.post('/challenge', challenges.get);
 app.get('/bo/challenges', challenges.getAllChallenges);
 app.post('/challenge', challenges.create);
 app.delete('/challenge', challenges.delete);
@@ -65,3 +66,8 @@ app.get('/bo/advices', advices.getAllAdvices);
  * ADDRESS PART
  */
 app.get('/addresses/:id', addresses.getById);
+
+/**
+ * Server part
+ */
+app.get('/status', status.status);

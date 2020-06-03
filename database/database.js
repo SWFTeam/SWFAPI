@@ -10,7 +10,7 @@ function _connect(db_server){
         database: db_server.database || "SWF"
     });
     _con.connect(function(err) {
-        if (err) throw err
+        if (err) throw err;
         console.log("Connected to", db_server.database, "database");
     });
 }
