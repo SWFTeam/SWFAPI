@@ -21,6 +21,7 @@ function _close(){
 
 async function _insertInto(table, attributes, data){
     try {
+        let insertedRequest = await _insertRequest(table, "insert");
         let sql = "INSERT INTO " + table  + " (" + attributes + ") VALUES ?;";
         let result = await asyncQuery(sql, data);
         return result.insertId;
@@ -32,6 +33,7 @@ async function _insertInto(table, attributes, data){
 
 async function _select(attributes, table, where){
     try {
+        let insertedRequest = await _insertRequest(table, "select");
         let sql = "SELECT " + attributes + " FROM " + table;
         if(where){
             sql += " WHERE " + where;
@@ -46,6 +48,7 @@ async function _select(attributes, table, where){
 
 async function _delete(table, where){
     try {
+        let insertedRequest = await _insertRequest(table, "delete");
         let sql = "DELETE FROM " + table + " WHERE " + where;
         let result = await asyncQuery(sql);
         return result;
@@ -57,6 +60,7 @@ async function _delete(table, where){
 
 async function _update(attributes, values, table, where){
     try {
+        let insertedRequest = await _insertRequest(table, "update");
         let i = 0;
         let sql = "UPDATE " + table + " SET ";
         attributes.forEach(async (attribute) => {
@@ -73,6 +77,21 @@ async function _update(attributes, values, table, where){
         let result = await asyncQuery(sql);
         return result;
     } catch(e){
+        console.error(e.sqlMessage);
+        return e;
+    }
+}
+
+async function _insertRequest(table, type){
+    try {
+        let data = [];
+        data.push(table);
+        data.push(type);
+        data.push(new Date(Date.now()).toMysqlFormat());
+        let sql = "INSERT INTO request (entity, type, date) VALUES ?;";
+        let result = await asyncQuery(sql, [data]);
+        return result.insertId;
+    } catch(e) {
         console.error(e.sqlMessage);
         return e;
     }
