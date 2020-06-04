@@ -80,12 +80,10 @@ async function _getAllChallenges(req, res){
         let challenges = [];
         const challs = await db.select("*", "challenge");
         for(chall of challs){
-            let descriptions = [];
             let description = await db.select("*", "description", "type='challenge' AND foreign_id=" + chall.id);
-            descriptions.push(description);
             challenges.push({
                 id: chall.id,
-                descriptions: descriptions
+                descriptions: description
             });
         };
         if(challs.errno){

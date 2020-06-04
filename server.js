@@ -40,7 +40,7 @@ app.post('/bo/user', users.getUser);
  */
 app.post('/challenge', challenges.get);
 app.get('/bo/challenges', challenges.getAllChallenges);
-app.post('/challenge', challenges.create);
+app.post('/bo/challenge', challenges.create);
 app.delete('/challenge', challenges.delete);
 app.put('/challenge', challenges.put);
 
