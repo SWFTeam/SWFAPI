@@ -81,10 +81,7 @@ async function _getAllChallenges(req, res){
         const challs = await db.select("*", "challenge");
         for(chall of challs){
             let description = await db.select("*", "description", "type='challenge' AND foreign_id=" + chall.id);
-            challenges.push({
-                id: chall.id,
-                descriptions: description
-            });
+            challenges.push(description);
         };
         if(challs.errno){
             res.status(INT_ERR).send({ error: "Internal server error." });
