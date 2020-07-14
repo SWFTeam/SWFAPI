@@ -110,7 +110,15 @@ async function _getUser(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    let user = await db.select("firstname, lastname, isAdmin, last_login_at, created_at", "user", "email_address='" + req.body.email + "'");
+    let user = await db.select("id, firstname, lastname, isAdmin, last_login_at, created_at", "user", "email_address='" + req.body.email + "'");
+    let xp = await db.selectExp(user[0].id);
+    delete user[0].id;
+    if(!xp.errno){
+        user[0].experience = xp[0].exp
+    } else {
+        res.status(BAD_REQUEST).send({ error: "An error occured, please try again." });
+        return;
+    }
     if(!user.errno){
         res.status(SUCCESS).send(user[0]);
     } else {

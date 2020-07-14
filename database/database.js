@@ -23,7 +23,6 @@ async function _insertInto(table, attributes, data){
     try {
         let insertedRequest = await _insertRequest(table, "insert");
         let sql = "INSERT INTO " + table  + " (" + attributes + ") VALUES ?;";
-        console.log(data)
         let result = await asyncQuery(sql, data);
         return result.insertId;
     } catch(e) {
@@ -83,6 +82,16 @@ async function _update(attributes, values, table, where){
     }
 }
 
+async function _selectCountExperienceByUserId(userId){
+    try {
+        let sql = "SELECT count(exp) as exp FROM experience e JOIN challenge c ON e.id = c.exp_id JOIN achieve a ON a.chall_id = c.id WHERE user_id = " + userId;
+        let result = await asyncQuery(sql);
+        return result;
+    } catch(e) {
+        console.error(e.sqlMessage);
+    }
+}
+
 async function _insertRequest(table, type){
     try {
         let data = [];
@@ -113,5 +122,6 @@ module.exports = {
     insert: _insertInto,
     select: _select,
     delete: _delete,
-    update: _update
+    update: _update,
+    selectExp: _selectCountExperienceByUserId
 }

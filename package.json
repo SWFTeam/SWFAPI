@@ -15,7 +15,7 @@
   "author": "SWFTeam",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^4.0.1",
+    "bcrypt": "latest",
     "express": "^4.17.1",
     "js-logger": "^1.6.0",
     "jsonwebtoken": "^8.5.1",

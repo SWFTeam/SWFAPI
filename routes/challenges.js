@@ -24,6 +24,7 @@ async function _createChallenge(req, res){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
     if(req.body){
+        console.log(req.body);
         let challenge = req.body;
         let descriptions = req.body.descriptions;
         let needs = req.body.needs;
@@ -34,6 +35,9 @@ async function _createChallenge(req, res){
         //Insert into description
         descriptions.forEach(async (description) => {
             description.foreign_id = challId;
+            if(description.title){
+
+            }
             const descriptionid = await descrUtils.insert(description);
             //console.log(descriptionid.errno);
             if(descriptionid.errno){
@@ -60,7 +64,7 @@ async function _createChallenge(req, res){
             }
         }
         await db.insert("preference_challenge", "chall_id, need_id", preference_challenge);
-        res.status(SUCCESS).send({ result: "Data inserted successsfully" });
+        res.status(CREATED).send({ result: "Data inserted successsfully" });
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
@@ -104,7 +108,7 @@ async function _getChallenge(req, res){
         const chall = await db.select("*", "challenge", "id=" + challId);
         const descriptions = await db.select("*", "description", "foreign_id=" + challId + " AND type=\"challenge\"");
         let descrs = [];
-        console.log(req.body.descriptions)
+        console.log(req.body)
         descriptions.forEach(description => {
             descrs.push(description);
         })
@@ -127,17 +131,15 @@ async function _deleteChallenge(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
     if(req.body){
         const challId = req.body.id;
         const expId = await db.select('exp_id', 'challenge', 'id=' + challId);
-
         const prefRes = await db.delete('preference_challenge', 'chall_id=' + challId);
         const challRes = await db.delete('challenge', 'id=' + challId);
         let expRes = "null";
         if(expId[0]) expRes = await db.delete('experience', 'id=' + expId[0].exp_id);
         const descRes = await db.delete('description', 'foreign_id=' + challId + " AND type=\"challenge\"");
-        if(prefRes.errno || challRes.errno || expRes.errno){
+        if(prefRes.errno || challRes.errno || expRes.errno || descRes.errno ){
             res.status(INT_ERR).send({ status: "Something bad occurs, contact someone..." });
         } else {
             res.status(SUCCESS).send({ status: "Challenge deleted successfully" });
@@ -158,7 +160,6 @@ async function _updateChallenge(req, res){
     }
     db.connect(conf.db_server);
     if(req.body){
-        console.log(req.body)
         let challengeId = req.body.id;
         let descriptions = req.body.descriptions;
         descriptions.forEach(async (description) => {
