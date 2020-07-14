@@ -21,6 +21,7 @@ const SALT = 12;
 async function _createUser(req, res){
    db.connect(conf.db_server);
    if(req.body){
+       console.log("BODY ->", req.body)
         //SET UserExperience
         let usr = req.body.user
         //ADDRESS INSERT
@@ -56,6 +57,7 @@ async function _createUser(req, res){
         //PASSWORD HASHING
         usr.password = bcrypt.hashSync(usr.password, SALT);
         //USER BIRTHDAY TO MYSQL FORMAT
+        console.log("BIRTHDAY ->", usr.birthday)
         usr.birthday = new Date(usr.birthday).toMysqlFormat();
         //INSERT USER
         attributes = null;
@@ -64,9 +66,11 @@ async function _createUser(req, res){
             attributes == null ? attributes = attr : attributes += "," + attr;
             user.push(usr[attr]);
         }
-        attributes += ', created_at';
+        attributes += ', created_at, last_login_at';
         let now = new Date().toMysqlFormat()
+        let lastLogin = new Date().toMysqlFormat()
         user.push(now);
+        user.push(lastLogin);
         const user_result = await db.insert("user", attributes, [user]);
         if(user_result.errno === undefined){
             res.status(CREATED).send(
@@ -118,6 +122,7 @@ async function _getUser(req, res){
 async function _getAllUsers(req, res){
     db.connect(conf.db_server);
     const tok = req.get('Authorization');
+    console.log(tok);
     if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
     const decoded = await token.authenticate(req.headers.authorization);
     if(!decoded){
@@ -182,7 +187,12 @@ async function _deleteUser(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
+    //const userId = decoded.id[0].id;
+    const userId = req.body.userId != undefined ? req.body.userId : null;
+    if(userId == null){
+        console.log(req.body)
+        return;
+    }
     let usr = await db.select("*", "user", "id = " + userId);
     if(usr[0]){
         usr = usr[0];

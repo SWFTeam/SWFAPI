@@ -1,9 +1,12 @@
 const db = require("../database/database.js");
+const conf = require('../database/conf.js');
 /**
  * Insert description 
  * @param {(Object)Description} description 
  */
 async function _insert(description){
+    console.log(description)
+    db.connect(conf.db_server);
     let attributes;
     let values = [];
     for(attr in description){

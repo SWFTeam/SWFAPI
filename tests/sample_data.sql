@@ -48,12 +48,7 @@ INSERT INTO user (id, firstname, lastname, email_address, password, birthday, ad
     VALUES (1, "julien", "guillan", "guillan.julien@live.com", "$2y$12$rTYcqAaglQHOtuPWGkzkoO8Am/KFXazsR9ToiUeeDzLBNeZMWORcu", NULL, 1, 1, NULL);
 INSERT INTO experience (id, exp)
     VALUES (1, 50);
-INSERT INTO challenge (id, exp_id)
-    VALUES (1, 1);
-INSERT INTO achieve (user_id, chall_id)
-    VALUES (1, 1);
-INSERT INTO event (id, address_id, exp_id)
-    VALUES (1, 2, 1);
-INSERT INTO participate (user_id, event_id)
-    VALUES(1, 1);
+INSERT INTO advice VALUES(1);
+INSERT INTO preference_advice VALUES(1, 1);
+INSERT INTO description (country_code, title, description, type, foreign_id) VALUES("FR", "advice", "ceci est un advice", "advice", 1);
 

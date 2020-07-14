@@ -24,9 +24,9 @@ async function _createChallenge(req, res){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
     if(req.body){
-        let challenge = req.body.challenge;
-        let descriptions = req.body.challenge.descriptions;
-        let needs = req.body.challenge.needs;
+        let challenge = req.body;
+        let descriptions = req.body.descriptions;
+        let needs = req.body.needs;
         //Insert into experience
         const expId = await db.insert("experience", "exp", [[challenge.experience]]);
         //Insert into challenge
@@ -104,6 +104,7 @@ async function _getChallenge(req, res){
         const chall = await db.select("*", "challenge", "id=" + challId);
         const descriptions = await db.select("*", "description", "foreign_id=" + challId + " AND type=\"challenge\"");
         let descrs = [];
+        console.log(req.body.descriptions)
         descriptions.forEach(description => {
             descrs.push(description);
         })
@@ -155,11 +156,11 @@ async function _updateChallenge(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
     db.connect(conf.db_server);
     if(req.body){
-        let challengeId = req.body.challenge.id;
-        let descriptions = req.body.challenge.descriptions;
+        console.log(req.body)
+        let challengeId = req.body.id;
+        let descriptions = req.body.descriptions;
         descriptions.forEach(async (description) => {
             description.foreign_id = challengeId;
             const descriptionRes = await descrUtils.update(description);
@@ -168,24 +169,28 @@ async function _updateChallenge(req, res){
                 return;
             }
         });
-        let needs = req.body.challenge.needs;
-        for(attr in needs){
-            if(needs[attr] == true){
-                const needsId = await db.select("need_id", "preference_challenge", "chall_id=" + challengeId);
-                const needDescr = await db.select("*", "description", "title=\"" + attr + "\" AND type=\"need\"");
-                needsId.forEach(id => {
-                    console.log(needDescr)
-                    if(id.need_id == needDescr[0].foreign_id){
-                        
-                    }
-                })
+        let needs = req.body.needs;
+        if(needs) {
+            for(attr in needs){
+                if(needs[attr] == true){
+                    const needsId = await db.select("need_id", "preference_challenge", "chall_id=" + challengeId);
+                    const needDescr = await db.select("*", "description", "title=\"" + attr + "\" AND type=\"need\"");
+                    needsId.forEach(id => {
+                        console.log(needDescr)
+                        if(id.need_id == needDescr[0].foreign_id){
+                            
+                        }
+                    })
+                }
             }
         }
+
         let challengeAttributes = [];
         let challengeValues = [];
-        for(attr in req.body.challenge){
+
+        for(attr in req.body){
             if(attr != "descriptions" &&  attr != "experience" && attr != "needs"){
-                challengeValues.push(req.body.challenge[attr]);
+                challengeValues.push(req.body[attr]);
                 challengeAttributes.push(attr);
             }
         }

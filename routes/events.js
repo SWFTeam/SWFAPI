@@ -25,7 +25,6 @@ async function _createEvent(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
     if(req.body){
         let event = req.body.event;
         let descriptions = req.body.event.descriptions;
@@ -45,6 +44,7 @@ async function _createEvent(req, res){
 
         descriptions.forEach(async (description) => {
             description.foreign_id = eventId;
+            console.log(description);
             const descriptionid = await descrUtils.insert(description);
             if(descriptionid.errno){
                 let code = INT_ERR;
@@ -66,7 +66,7 @@ async function _createEvent(req, res){
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
-    db.close();
+    //db.close();
 }
 
 async function _getEvent(req, res){
@@ -77,7 +77,6 @@ async function _getEvent(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
     if(req.body){
         let eventId = req.body.id;
         let event = await db.select("*", "event", "id=" + eventId);
@@ -112,7 +111,6 @@ async function _getAllEvents(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id;
     if(req.body){
         let events = [];
         const evts = await db.select("*", "event");
@@ -121,7 +119,6 @@ async function _getAllEvents(req, res){
             let description = await db.select("*", "description", "type='event' AND foreign_id=" + evt.id);
             let address = await db.select("*", "address", "id=" + evt.address_id);
             descriptions.push(description);
-            console.log(evt);
             events.push({
                 id: evt.id,
                 address: address,
@@ -129,6 +126,7 @@ async function _getAllEvents(req, res){
                 date_end: evt.date_end,
                 descriptions: descriptions
             });
+            console.log(events);
         };
         if(evts.errno){
             res.status(INT_ERR).send({ error: "Internal server error." });
