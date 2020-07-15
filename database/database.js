@@ -92,6 +92,16 @@ async function _selectCountExperienceByUserId(userId){
     }
 }
 
+async function _selectAchieveByEmail(userEmail){
+    try {
+        let sql = "select chall_id from achieve a join user u on u.id = a.user_id where u.email_address = '" + userEmail + "'";
+        let result = await asyncQuery(sql);
+        return result;
+    } catch(e) {
+        console.error(e.sqlMessage);
+    }
+}
+
 async function _insertRequest(table, type){
     try {
         let data = [];
@@ -123,5 +133,6 @@ module.exports = {
     select: _select,
     delete: _delete,
     update: _update,
-    selectExp: _selectCountExperienceByUserId
+    selectExp: _selectCountExperienceByUserId,
+    selectAchieve: _selectAchieveByEmail
 }

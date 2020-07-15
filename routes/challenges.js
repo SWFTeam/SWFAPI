@@ -229,6 +229,34 @@ async function _achieveChallenge(req, res){
                 res.status(INT_ERR).send({ error: "Something bad occurs" });
             }
         }
+    } else {
+        res.status(BAD_REQUEST).send({ error: "Missing parameters" });
+    }
+}
+
+async function _getAllCompleteChallenges(req, res){
+    //Token VERIF
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    db.connect(conf.db_server);
+    if(req.body){
+        let userEmail = req.body.userEmail;
+        let challengesRes = await db.selectAchieve(userEmail);
+        let challengesId = [];
+        if(challengesId.errno){
+            res.status(INT_ERR).send({ error: "Something bad occurs" });
+            return;
+        }
+        challengesRes.forEach(challId => {
+            challengesId.push(challId.chall_id);
+        })
+        res.status(SUCCESS).send(challengesId);
+    } else {
+        res.status(BAD_REQUEST).send({ error: "Missing parameters" });
     }
 }
 
@@ -238,5 +266,6 @@ module.exports = {
     getAllChallenges: _getAllChallenges,
     delete: _deleteChallenge,
     put: _updateChallenge,
-    achieve: _achieveChallenge 
+    achieve: _achieveChallenge,
+    completed: _getAllCompleteChallenges
 }
