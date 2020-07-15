@@ -84,7 +84,7 @@ async function _update(attributes, values, table, where){
 
 async function _selectCountExperienceByUserId(userId){
     try {
-        let sql = "SELECT count(exp) as exp FROM experience e JOIN challenge c ON e.id = c.exp_id JOIN achieve a ON a.chall_id = c.id WHERE user_id = " + userId;
+        let sql = "SELECT sum(exp) as exp FROM experience e JOIN challenge c ON e.id = c.exp_id JOIN achieve a ON a.chall_id = c.id WHERE user_id = " + userId;
         let result = await asyncQuery(sql);
         return result;
     } catch(e) {

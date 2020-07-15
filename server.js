@@ -43,6 +43,7 @@ app.get('/bo/challenges', challenges.getAllChallenges);
 app.post('/bo/challenge', challenges.create);
 app.delete('/challenge', challenges.delete);
 app.put('/challenge', challenges.put);
+app.post('/achieve', challenges.achieve);
 
 /**
  * EVENT PART

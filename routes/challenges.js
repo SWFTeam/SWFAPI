@@ -207,10 +207,36 @@ async function _updateChallenge(req, res){
     db.close();
 }
 
+async function _achieveChallenge(req, res){
+    //Token VERIF
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    db.connect(conf.db_server);
+    if(req.body){
+        let challengeId = req.body.challId;
+        let userEmail = req.body.userEmail;
+        let userId = await db.select('id', 'user', 'email_address="' + userEmail + '"');
+        if(userId[0].id){
+            userId = userId[0].id;
+            let achieveRes = await db.insert('achieve', 'user_id, chall_id', [[userId, challengeId]]);
+            if(achieveRes == 0){
+                res.status(200).send({ message: "User " + userId +" successfully achieved challenge n° " + challengeId });
+            } else {
+                res.status(INT_ERR).send({ error: "Something bad occurs" });
+            }
+        }
+    }
+}
+
 module.exports = {
     create: _createChallenge,
     get: _getChallenge,
     getAllChallenges: _getAllChallenges,
     delete: _deleteChallenge,
-    put: _updateChallenge
+    put: _updateChallenge,
+    achieve: _achieveChallenge 
 }
