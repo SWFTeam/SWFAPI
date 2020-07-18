@@ -112,10 +112,16 @@ async function _getUser(req, res){
     }
     let user = await db.select("id, firstname, lastname, isAdmin, last_login_at, created_at", "user", "email_address='" + req.body.email + "'");
     let xp = await db.selectExp(user[0].id);
+    let xpEvents = await db.selectExpEvents(user[0].id);
     delete user[0].id;
     if(!xp.errno){
-        if(xp[0]){
+        if(xp[0] && xpEvents[0]){
+            user[0].experience = xpEvents[0].exp;
+            user[0].experience += xp[0].exp;
+        } else if(xp[0] && !xpEvents[0]){
             user[0].experience = xp[0].exp
+        } else if(!xp[0] && xpEvents[0]){
+            user[0].experience = xpEvents[0].exp;
         } else {
             user[0].experience = 0;
         }

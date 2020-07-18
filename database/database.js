@@ -102,6 +102,16 @@ async function _selectCountExperienceByUserId(userId){
     }
 }
 
+async function _selectCountExperienceEventsByUserId(userId){
+    try {
+        let sql = "SELECT sum(exp) as exp FROM experience e JOIN event c ON e.id = c.exp_id JOIN participate a ON a.event_id = c.id WHERE e.exp AND user_id = " + userId;
+        let result = await asyncQuery(sql);
+        return result;
+    } catch(e) {
+        console.error(e.sqlMessage);
+    }
+}
+
 async function _selectAchieveByEmail(userEmail){
     try {
         let sql = "select chall_id from achieve a join user u on u.id = a.user_id where u.email_address = '" + userEmail + "'";
@@ -174,6 +184,7 @@ module.exports = {
     delete: _delete,
     update: _update,
     selectExp: _selectCountExperienceByUserId,
+    selectExpEvents: _selectCountExperienceEventsByUserId,
     selectAchieve: _selectAchieveByEmail,
     selectExpByChall: _selectExpByChall,
     selectExpByEvent: _selectExpByEvent,
