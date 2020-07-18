@@ -227,10 +227,65 @@ async function _updateEvent(req, res){
     db.close();
 }
 
+async function _participateEvent(req, res){
+    //Token VERIF
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    db.connect(conf.db_server);
+    if(req.body){
+        let eventId = req.body.eventId;
+        let userEmail = req.body.userEmail;
+        let userId = await db.select('id', 'user', 'email_address="' + userEmail + '"');
+        if(userId[0].id){
+            userId = userId[0].id;
+            let participateRes = await await db.insert('participate', 'user_id, event_id', [[userId, eventId]]);
+            if(participateRes == 0){
+                res.status(200).send({ message: "User " + userId + " successfully participated event n° " + eventId });
+            } else {
+                res.status(INT_ERR).send({ error: "Something bad occurs" });
+            }
+        }
+    } else {
+        res.status(BAD_REQUEST).send({ error: "Missing parameters" });
+    }
+}
+
+async function _getAllParticipatedEvents(req, res){
+    //Token VERIF
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    db.connect(conf.db_server);
+    if(req.body){
+        let userEmail = req.body.userEmail;
+        let eventsRes = await db.selectParticipate(userEmail);
+        let eventsId = [];
+        if(eventsId.errno){
+            res.status(INT_ERR).send({ error: "Something bad occurs" });
+            return;
+        }
+        eventsRes.forEach(eventId => {
+            eventsId.push(eventId.event_id);
+        })
+        res.status(SUCCESS).send({ completed: eventsId });
+    } else {
+        res.status(BAD_REQUEST).send({ error: "Missing parameters" });
+    }
+}
+
 module.exports = {
     create: _createEvent,
     get: _getEvent,
     getAllEvents: _getAllEvents,
     delete: _deleteEvent,
-    put: _updateEvent
+    put: _updateEvent,
+    participate: _participateEvent,
+    participated: _getAllParticipatedEvents
 }

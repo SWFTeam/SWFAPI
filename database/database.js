@@ -156,6 +156,16 @@ function asyncQuery(sql, data = null){
     });
 }
 
+async function _selectParticipateByEmail(userEmail){
+    try {
+        let sql = "select event_id from participate a join user u on u.id = a.user_id where u.email_address = '" + userEmail + "'";
+        let result = await asyncQuery(sql);
+        return result;
+    } catch(e) {
+        console.error(e.sqlMessage);
+    }
+}
+
 module.exports = {
     connect: _connect,
     close: _close,
@@ -167,5 +177,6 @@ module.exports = {
     selectAchieve: _selectAchieveByEmail,
     selectExpByChall: _selectExpByChall,
     selectExpByEvent: _selectExpByEvent,
-    updateExp: _updateExp
+    updateExp: _updateExp,
+    selectParticipate: _selectParticipateByEmail
 }
