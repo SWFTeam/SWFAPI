@@ -25,6 +25,8 @@ async function _createEvent(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
+    let code = 200;
+    let message = "success";
     if(req.body){
         let event = req.body.event;
         let descriptions = req.body.event.descriptions;
@@ -41,30 +43,32 @@ async function _createEvent(req, res){
         const date_start = new Date(event.date_start).toMysqlFormat();
         const date_end = new Date(event.date_end).toMysqlFormat();
         const eventId = await db.insert("event", "address_id, date_start, date_end, exp_id", [[addressId, date_start, date_end, expId]]);
-
-        descriptions.forEach(async (description) => {
-            description.foreign_id = eventId;
-            console.log(description);
-            const descriptionid = await descrUtils.insert(description);
-            if(descriptionid.errno){
-                let code = INT_ERR;
-                let message = "Something bad occurs, please try again later...";
-                switch(descriptionid.errno){
-                    case 1062:  
-                        code = BAD_REQUEST;
-                        message = "Duplicate entry for event description";
-                        break;
-                    default:
-                        break;
+        if(!eventId.errno){
+            descriptions.forEach(async (description) => {
+                description.foreign_id = eventId;
+                const descriptionId = await descrUtils.insert(description);
+                if(descriptionId.errno){
+                    code = INT_ERR;
+                    message = "Something bad occurs, please try again later...";
+                    switch(descriptionId.errno){
+                        case 1062:  
+                            code = BAD_REQUEST;
+                            message = "Duplicate entry for event description";
+                            break;
+                        default:
+                            res.status(code).send({ result: message });
+                            break;
+                    }
+                } else {
+                
                 }
-                res.status(code).send({ error: message});
-                return;
-            }
-        });
-
-        res.status(SUCCESS).send({ result: "Data inserted successsfully" });
+            });
+        }
+        code = SUCCESS;
+        message = "Data inserted successfuly"
     } else {
-        res.status(INT_ERR).send("Something bad occurs, please try again later...");
+        code = INT_ERR;
+        message = "Internal server error";
     }
     //db.close();
 }
@@ -118,15 +122,17 @@ async function _getAllEvents(req, res){
             let descriptions = [];
             let description = await db.select("*", "description", "type='event' AND foreign_id=" + evt.id);
             let address = await db.select("*", "address", "id=" + evt.address_id);
+            let experience = await db.selectExpByEvent(evt.id);
             descriptions.push(description);
+            console.log(descriptions)
             events.push({
                 id: evt.id,
                 address: address,
                 date_start: evt.date_start,
                 date_end: evt.date_end,
-                descriptions: descriptions
+                experience: experience[0].exp,
+                descriptions: description
             });
-            console.log(events);
         };
         if(evts.errno){
             res.status(INT_ERR).send({ error: "Internal server error." });
@@ -144,7 +150,7 @@ async function _deleteEvent(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
+    console.log(req.body)
     if(req.body){
         const eventId = req.body.id;
         const expId = await db.select('exp_id', 'event', 'id=' + eventId);

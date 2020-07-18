@@ -82,9 +82,19 @@ async function _update(attributes, values, table, where){
     }
 }
 
+async function _updateExp(challId, exp){
+    try {
+        let sql = "update experience set exp = " + exp + " where id = (select exp_id from challenge where id = " + challId + ")";
+        let result = await asyncQuery(sql);
+        return result;
+    } catch(e) {
+        console.error(e);
+    }
+}
+
 async function _selectCountExperienceByUserId(userId){
     try {
-        let sql = "SELECT sum(exp) as exp FROM experience e JOIN challenge c ON e.id = c.exp_id JOIN achieve a ON a.chall_id = c.id WHERE user_id = " + userId;
+        let sql = "SELECT sum(exp) as exp FROM experience e JOIN challenge c ON e.id = c.exp_id JOIN achieve a ON a.chall_id = c.id WHERE e.exp AND user_id = " + userId;
         let result = await asyncQuery(sql);
         return result;
     } catch(e) {
@@ -99,6 +109,26 @@ async function _selectAchieveByEmail(userEmail){
         return result;
     } catch(e) {
         console.error(e.sqlMessage);
+    }
+}
+
+async function _selectExpByChall(challId){
+    try {
+        let sql = 'select exp from experience e join challenge c on e.id = c.exp_id where e.exp and c.id = ' + challId;
+        let result = await asyncQuery(sql);
+        return result;
+    } catch (e) {
+        console.error(e.sqlMessage)
+    }
+}
+
+async function _selectExpByEvent(eventId){
+    try {
+        let sql = 'select exp from experience e join event c on e.id = c.exp_id where e.exp and c.id = ' + eventId;
+        let result = await asyncQuery(sql);
+        return result;
+    } catch (e) {
+        console.error(e.sqlMessage)
     }
 }
 
@@ -134,5 +164,8 @@ module.exports = {
     delete: _delete,
     update: _update,
     selectExp: _selectCountExperienceByUserId,
-    selectAchieve: _selectAchieveByEmail
+    selectAchieve: _selectAchieveByEmail,
+    selectExpByChall: _selectExpByChall,
+    selectExpByEvent: _selectExpByEvent,
+    updateExp: _updateExp
 }

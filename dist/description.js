@@ -5,7 +5,6 @@ const conf = require('../database/conf.js');
  * @param {(Object)Description} description 
  */
 async function _insert(description){
-    console.log(description)
     db.connect(conf.db_server);
     let attributes;
     let values = [];
@@ -13,7 +12,14 @@ async function _insert(description){
             attributes == null ? attributes = attr : attributes += "," + attr;
             values.push(description[attr]);
         }
-    return await db.insert("description", attributes, [values]);
+    let result;
+    try{
+        result = await db.insert("description", attributes, [values]);
+    } catch(e){
+        //console.error(e);
+        result = e;
+    }
+    return result
 }
 
 async function _update(description){

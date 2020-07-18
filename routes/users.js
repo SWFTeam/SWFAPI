@@ -114,7 +114,11 @@ async function _getUser(req, res){
     let xp = await db.selectExp(user[0].id);
     delete user[0].id;
     if(!xp.errno){
-        user[0].experience = xp[0].exp
+        if(xp[0]){
+            user[0].experience = xp[0].exp
+        } else {
+            user[0].experience = 0;
+        }
     } else {
         res.status(BAD_REQUEST).send({ error: "An error occured, please try again." });
         return;

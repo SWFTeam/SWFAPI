@@ -35,9 +35,7 @@ async function _createChallenge(req, res){
         //Insert into description
         descriptions.forEach(async (description) => {
             description.foreign_id = challId;
-            if(description.title){
 
-            }
             const descriptionid = await descrUtils.insert(description);
             //console.log(descriptionid.errno);
             if(descriptionid.errno){
@@ -79,13 +77,21 @@ async function _getAllChallenges(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id;
     if(req.body){
         let challenges = [];
         const challs = await db.select("*", "challenge");
         for(chall of challs){
             let description = await db.select("*", "description", "type='challenge' AND foreign_id=" + chall.id);
-            challenges.push({ id: chall.id, description });
+            let experience = await db.selectExpByChall(chall.id);
+            if(experience[0]){
+                experience = experience[0].exp;
+            } else {
+                experience = 0;
+            }
+            challenges.push({ 
+                id: chall.id, 
+                description, 
+                experience });
         };
         if(challs.errno){
             res.status(INT_ERR).send({ error: "Internal server error." });
@@ -105,22 +111,22 @@ async function _getChallenge(req, res){
     }
     if(req.body){
         const challId = req.body.id;
-        const chall = await db.select("*", "challenge", "id=" + challId);
         const descriptions = await db.select("*", "description", "foreign_id=" + challId + " AND type=\"challenge\"");
+        let experience = await db.selectExpByChall(challId);
         let descrs = [];
-        console.log(req.body)
         descriptions.forEach(description => {
             descrs.push(description);
         })
         const challenge = {
             id: challId,
-            descriptions: descrs
+            description: descrs
         }
+        challenge["experience"] = experience[0].exp
         res.status(SUCCESS).send({ challenge });
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
-    db.close();
+    //db.close();
 }
 
 async function _deleteChallenge(req, res){
@@ -162,6 +168,7 @@ async function _updateChallenge(req, res){
     if(req.body){
         let challengeId = req.body.id;
         let descriptions = req.body.descriptions;
+        let experience = req.body.experience;
         descriptions.forEach(async (description) => {
             description.foreign_id = challengeId;
             const descriptionRes = await descrUtils.update(description);
@@ -183,6 +190,14 @@ async function _updateChallenge(req, res){
                         }
                     })
                 }
+            }
+        }
+        console.log(req.body)
+        if(req.body.experience != undefined){
+            let expRes = db.updateExp(challengeId, experience);
+            if(expRes.errno){
+                res.status(INT_ERR).send({ error: "Something bad occurs" });
+                return;
             }
         }
 
@@ -254,7 +269,7 @@ async function _getAllCompleteChallenges(req, res){
         challengesRes.forEach(challId => {
             challengesId.push(challId.chall_id);
         })
-        res.status(SUCCESS).send(challengesId);
+        res.status(SUCCESS).send({ completed: challengesId });
     } else {
         res.status(BAD_REQUEST).send({ error: "Missing parameters" });
     }

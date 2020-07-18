@@ -74,12 +74,13 @@ async function _getAllAdvices(req, res){
         let advices = [];
         const advs = await db.select("*", "advice");
         for(advice of advs){
-            let descriptions = [];
+            let descriptions = []
             let description = await db.select("*", "description", "type='advice' AND foreign_id=" + advice.id);
-            descriptions.push(description);
+            description = description[0];
+            descriptions.push(description)
             advices.push({
                 id: advice.id,
-                descriptions: descriptions
+                descriptions
             });
         };
         if(advs.errno){
@@ -128,8 +129,8 @@ async function _deleteAdvice(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
     db.connect(conf.db_server);
+    console.log(req.body);
     if(req.body.id){
         let adviceId = req.body.id;
         const prefRes = await db.delete('preference_advice', 'advice_id=' + adviceId);
