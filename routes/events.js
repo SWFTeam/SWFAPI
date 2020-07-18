@@ -280,9 +280,52 @@ async function _getAllParticipatedEvents(req, res){
     }
 }
 
+async function _getById(req, res){
+
+    console.log("DONE")
+
+    db.connect(conf.db_server);
+    const tok = req.get('Authorization');
+    if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
+    const decoded = await token.authenticate(req.headers.authorization);
+    if(!decoded){
+        return res.status(UNAUTHORIZED).send({error: "Not logged in."});
+    }
+    if(req.body){
+        let eventId = req.params.id;
+        let event = await db.select("id, address_id, date_start, date_end, exp_id", "event", "id=" + eventId);
+        event[0].date_start = event[0].date_start.toISOString().slice(0, 19).replace('T', ' ');
+        event[0].date_end = event[0].date_end.toISOString().slice(0, 19).replace('T', ' ');
+        console.log(event)
+        let descriptions = await db.select("*", "description", "foreign_id=" + eventId + " AND type=\"event\"");
+        let address = await db.select("*", "address", "id=" + event[0].address_id);
+        let exp = await db.select("exp", "experience", "id=" + event[0].exp_id);
+        let final_descriptions = [];
+        descriptions.forEach(description => {
+            final_descriptions.push(description);
+        })
+        let final_event = {
+            id: eventId,
+            address: address,
+            descriptions: final_descriptions,
+            experience: exp[0].exp,
+            date_start: event[0].date_start,
+            date_end: event[0].date_end
+        }
+        if(!event.errno){
+            res.status(SUCCESS).send(final_event);
+        } else {
+            res.status(INT_ERR).send({ result: event.errno });
+        }
+    } else {
+        res.status(INT_ERR).send({ result: "Something bad occurs, please try again later" });
+    }
+}
+
 module.exports = {
     create: _createEvent,
     get: _getEvent,
+    getById: _getById,
     getAllEvents: _getAllEvents,
     delete: _deleteEvent,
     put: _updateEvent,
