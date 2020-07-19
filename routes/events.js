@@ -25,11 +25,11 @@ async function _createEvent(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    let code = 200;
+    let code = 201;
     let message = "success";
     if(req.body){
-        let event = req.body.event;
-        let descriptions = req.body.event.descriptions;
+        let event = req.body;
+        let descriptions = req.body.descriptions;
         let addressArr = [];
         let attributes = null;
         for(attr in event.address){
@@ -177,13 +177,13 @@ async function _updateEvent(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
     db.connect(conf.db_server);
     if(req.body){
-        let eventId = req.body.event.id;
-        let descriptions = req.body.event.descriptions;
-        let address = req.body.event.address;
-        const addressId = req.body.event.address.id;
+        console.log(req.body)
+        let eventId = req.body.id;
+        let descriptions = req.body.descriptions;
+        let address = req.body.address;
+        const addressId = req.body.address.id;
         descriptions.forEach(async (description) => {
             description.foreign_id = eventId;
             const descriptionRes = await descrUtils.update(description);
@@ -205,12 +205,12 @@ async function _updateEvent(req, res){
         }
         let eventAttributes = [];
         let eventValues = [];
-        for(attr in req.body.event){
+        for(attr in req.body){
             if(attr != "descriptions" && attr != "address" && attr != "experience"){
                 if(attr == "date_start" || attr == "date_end"){
-                    eventValues.push(new Date(req.body.event[attr]).toMysqlFormat());
+                    eventValues.push(new Date(req.body[attr]).toMysqlFormat());
                 } else {
-                    eventValues.push(req.body.event[attr]);
+                    eventValues.push(req.body[attr]);
                 }
                 eventAttributes.push(attr);
             }

@@ -49,7 +49,7 @@ app.post('/completed', challenges.completed);
 /**
  * EVENT PART
  */
-app.post('/event', events.create);
+app.post('/bo/event', events.create);
 app.get('/bo/events', events.getAllEvents);
 app.get('/event', events.get);
 app.delete('/event', events.delete);
@@ -58,7 +58,7 @@ app.put('/event', events.put);
 /**
  * ADVICE PART
  */
-app.post('/advice', advices.create);
+app.post('/bo/advice', advices.create);
 app.delete('/advice', advices.delete);
 app.put('/advice', advices.edit);
 app.get('/advice', advices.getAdvice);
@@ -67,7 +67,8 @@ app.get('/bo/advices', advices.getAllAdvices);
 /**
  * ADDRESS PART
  */
-app.get('/addresses/:id', addresses.getById);
+app.get('/address/:id', addresses.getById);
+app.put('/address', addresses.update)
 
 /**
  * Server part

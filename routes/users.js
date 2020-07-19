@@ -241,26 +241,43 @@ async function _updateUser(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
-    db.connect(conf.db_server);
-    let attributes = [];
-    let values = [];
-    for(attr in req.body){
-        attributes.push(attr);
-        values.push(req.body[attr]);
+    if(req.body){
+        let user = req.body
+        let userId = user.id;
+        let address = user.address;
+        user.email_address = user.email
+        if(user.is_admin){
+            user.isAdmin = 1;
+        } else {
+            user.isAdmin = 0;
+        }
+        user.birthday = new Date(user.birthday).toMysqlFormat();
+        user.last_login_at = new Date(user.last_login_at).toMysqlFormat();
+        user.created_at = new Date(user.created_at).toMysqlFormat();
+        console.log(user.birthday)
+        delete user.email;
+        delete user.address;
+        delete user.token;
+        delete user.password;
+        delete user.is_admin;
+        db.connect(conf.db_server);
+        let attributes = [];
+        let values = [];
+        for(attr in user){
+            attributes.push(attr);
+            values.push(user[attr]);
+        }
+        console.log(user.email_address);
+        const updateRes = await db.update(attributes, [values], "user", "id=" + userId);
+        if(updateRes.errno){
+            res.status(INT_ERR).send( {error: "Database update error" } );
+            return;
+        }
+        res.status(SUCCESS).send({ result: "Data updated successsfully" });
+        db.close();
     }
-    const updateRes = await db.update(attributes, values, "user", "id=" + userId);
-    if(updateRes.errno){
-        res.status(INT_ERR).send( {error: "Database update error" } );
-        return;
-    }
-    res.status(SUCCESS).send({ result: "Data updated successsfully" });
-    db.close();
 }
-//TBD
-function checkUser(user){
-    
-}
+
 function twoDigits(d) {
     if(0 <= d && d < 10) return "0" + d.toString();
     if(-10 < d && d < 0) return "-0" + (-1*d).toString();
