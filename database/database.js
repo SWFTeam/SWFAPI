@@ -23,6 +23,7 @@ async function _insertInto(table, attributes, data){
     try {
         let insertedRequest = await _insertRequest(table, "insert");
         let sql = "INSERT INTO " + table  + " (" + attributes + ") VALUES ?;";
+        console.log("DEBUG   ", sql)
         let result = await asyncQuery(sql, data);
         return result.insertId;
     } catch(e) {
@@ -102,6 +103,16 @@ async function _selectCountExperienceByUserId(userId){
     }
 }
 
+async function _selectCountExperienceEventsByUserId(userId){
+    try {
+        let sql = "SELECT sum(exp) as exp FROM experience e JOIN event c ON e.id = c.exp_id JOIN participate a ON a.event_id = c.id WHERE e.exp AND user_id = " + userId;
+        let result = await asyncQuery(sql);
+        return result;
+    } catch(e) {
+        console.error(e.sqlMessage);
+    }
+}
+
 async function _selectAchieveByEmail(userEmail){
     try {
         let sql = "select chall_id from achieve a join user u on u.id = a.user_id where u.email_address = '" + userEmail + "'";
@@ -156,6 +167,16 @@ function asyncQuery(sql, data = null){
     });
 }
 
+async function _selectParticipateByEmail(userEmail){
+    try {
+        let sql = "select event_id from participate a join user u on u.id = a.user_id where u.email_address = '" + userEmail + "'";
+        let result = await asyncQuery(sql);
+        return result;
+    } catch(e) {
+        console.error(e.sqlMessage);
+    }
+}
+
 module.exports = {
     connect: _connect,
     close: _close,
@@ -164,8 +185,10 @@ module.exports = {
     delete: _delete,
     update: _update,
     selectExp: _selectCountExperienceByUserId,
+    selectExpEvents: _selectCountExperienceEventsByUserId,
     selectAchieve: _selectAchieveByEmail,
     selectExpByChall: _selectExpByChall,
     selectExpByEvent: _selectExpByEvent,
-    updateExp: _updateExp
+    updateExp: _updateExp,
+    selectParticipate: _selectParticipateByEmail
 }

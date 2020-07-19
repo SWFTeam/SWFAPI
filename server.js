@@ -54,6 +54,9 @@ app.get('/bo/events', events.getAllEvents);
 app.get('/event', events.get);
 app.delete('/event', events.delete);
 app.put('/event', events.put);
+app.post('/participate', events.participate);
+app.post('/participated', events.participated);
+app.get('/event/:id', events.getById)
 
 /**
  * ADVICE PART
