@@ -124,7 +124,6 @@ async function _getAllEvents(req, res){
             let address = await db.select("*", "address", "id=" + evt.address_id);
             let experience = await db.selectExpByEvent(evt.id);
             descriptions.push(description);
-            console.log(descriptions)
             events.push({
                 id: evt.id,
                 address: address,
@@ -150,7 +149,6 @@ async function _deleteEvent(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    console.log(req.body)
     if(req.body){
         const eventId = req.body.id;
         const expId = await db.select('exp_id', 'event', 'id=' + eventId);
@@ -179,7 +177,6 @@ async function _updateEvent(req, res){
     }
     db.connect(conf.db_server);
     if(req.body){
-        console.log(req.body)
         let eventId = req.body.id;
         let descriptions = req.body.descriptions;
         let address = req.body.address;
@@ -281,9 +278,6 @@ async function _getAllParticipatedEvents(req, res){
 }
 
 async function _getById(req, res){
-
-    console.log("DONE")
-
     db.connect(conf.db_server);
     const tok = req.get('Authorization');
     if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
@@ -296,7 +290,6 @@ async function _getById(req, res){
         let event = await db.select("id, address_id, date_start, date_end, exp_id", "event", "id=" + eventId);
         event[0].date_start = event[0].date_start.toISOString().slice(0, 19).replace('T', ' ');
         event[0].date_end = event[0].date_end.toISOString().slice(0, 19).replace('T', ' ');
-        console.log(event)
         let descriptions = await db.select("*", "description", "foreign_id=" + eventId + " AND type=\"event\"");
         let address = await db.select("*", "address", "id=" + event[0].address_id);
         let exp = await db.select("exp", "experience", "id=" + event[0].exp_id);

@@ -26,12 +26,10 @@ async function _getById(req, res){
     }
     if(req.body && req.params.id){
         let address = await db.select("*", "address", "id=" + req.params.id);
-        console.log(address)
         if(address.errno){
             res.status(INT_ERR).send({ error: "Internal server error." });
             return;
         } 
-        
         res.status(SUCCESS).send(address[0]);
     }
 }
@@ -46,7 +44,6 @@ async function _update(req, res){
     }
     if(req.body){
         let address = req.body;
-        console.log(address.id);
         let attributes = [];
         let values = [];
         for(attr in address){
@@ -55,10 +52,11 @@ async function _update(req, res){
         }
         const updateRes = await db.update(attributes, [values], "address", "id=" + address.id);
         if(!updateRes.errno){
-            res.send(SUCCESS).send({ message: "Successfully updated address: " + address.id});
+            res.status(SUCCESS).send({ message: "Successfully updated address: " + address.id});
             return;
         } else {
-            res.send(INT_ERR).send({ message: "Error during update of address: " + address.id});
+            res.status(INT_ERR).send({ message: "Error during update of address: " + address.id});
+            return;
         }
     } else {
         res.send(INT_ERR).send({ message: "Missing request's body"});

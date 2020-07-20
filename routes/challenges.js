@@ -114,6 +114,7 @@ async function _getChallenge(req, res){
         const descriptions = await db.select("*", "description", "foreign_id=" + challId + " AND type=\"challenge\"");
         let experience = await db.selectExpByChall(challId);
         let descrs = [];
+        console.log(challId)
         descriptions.forEach(description => {
             descrs.push(description);
         })
@@ -121,6 +122,7 @@ async function _getChallenge(req, res){
             id: challId,
             description: descrs
         }
+        console.log(experience)
         challenge["experience"] = experience[0].exp
         res.status(SUCCESS).send({ challenge });
     } else {

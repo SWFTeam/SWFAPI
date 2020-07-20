@@ -11,7 +11,7 @@ function _connect(db_server){
     });
     _con.connect(function(err) {
         if (err) throw err;
-        console.log("Connected to", db_server.database, "database");
+        console.log("Request to", db_server.database, "database");
     });
 }
 
@@ -23,7 +23,6 @@ async function _insertInto(table, attributes, data){
     try {
         let insertedRequest = await _insertRequest(table, "insert");
         let sql = "INSERT INTO " + table  + " (" + attributes + ") VALUES ?;";
-        console.log("DEBUG   ", sql)
         let result = await asyncQuery(sql, data);
         return result.insertId;
     } catch(e) {

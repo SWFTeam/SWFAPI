@@ -18,10 +18,11 @@ const INT_ERR = 500;
 
 const SALT = 12;
 
+const log = console.log
+
 async function _createUser(req, res){
    db.connect(conf.db_server);
    if(req.body){
-       console.log("BODY ->", req.body)
         //SET UserExperience
         let usr = req.body.user
         //ADDRESS INSERT
@@ -57,7 +58,6 @@ async function _createUser(req, res){
         //PASSWORD HASHING
         usr.password = bcrypt.hashSync(usr.password, SALT);
         //USER BIRTHDAY TO MYSQL FORMAT
-        console.log("BIRTHDAY ->", usr.birthday)
         usr.birthday = new Date(usr.birthday).toMysqlFormat();
         //INSERT USER
         attributes = null;
@@ -140,13 +140,11 @@ async function _getUser(req, res){
 async function _getAllUsers(req, res){
     db.connect(conf.db_server);
     const tok = req.get('Authorization');
-    console.log(tok);
     if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
     const decoded = await token.authenticate(req.headers.authorization);
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id;
     if(req.body){
         const users = await db.select("*", "user");
         if(users.errno){
@@ -177,9 +175,7 @@ async function _login(req, res){
             let last_login = new Date().toMysqlFormat();
             let tmp_last = []
             tmp_last.push(last_login)
-            console.log(tmp_last)
             const insert_status = await db.update(['last_login_at'], [tmp_last], "user", "id=" + userId[0].id)
-            console.log(insert_status)
             let tok = token.make(userId[0].id);
             if(req.originalUrl == '/bo/signin'){
                 if(userId[0].isAdmin == 1){
@@ -187,8 +183,10 @@ async function _login(req, res){
                     return;
                 }
             }
+            log(Date.now(), ": login user", userId);
             res.status(SUCCESS).send({ token: tok});
         } else {
+            log(Date.now(), ": bad credeantials", email);
             res.status(FORBIDDEN).send({ error : 'Bad credentials'});
         }
     } else {
@@ -198,6 +196,7 @@ async function _login(req, res){
 }
 
 async function _deleteUser(req, res){
+    console.log(Date.now(), ": delete user");
     db.connect(conf.db_server);
     const tok = req.get('Authorization');
     if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
@@ -260,7 +259,6 @@ async function _updateUser(req, res){
         user.birthday = new Date(user.birthday).toMysqlFormat();
         user.last_login_at = new Date(user.last_login_at).toMysqlFormat();
         user.created_at = new Date(user.created_at).toMysqlFormat();
-        console.log(user.birthday)
         delete user.email;
         delete user.address;
         delete user.token;
@@ -273,9 +271,9 @@ async function _updateUser(req, res){
             attributes.push(attr);
             values.push(user[attr]);
         }
-        console.log(user.email_address);
         const updateRes = await db.update(attributes, [values], "user", "id=" + userId);
         if(updateRes.errno){
+            //.error("ERROR => ", updateRes);
             res.status(INT_ERR).send( {error: "Database update error" } );
             return;
         }
