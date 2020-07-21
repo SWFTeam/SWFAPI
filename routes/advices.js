@@ -163,6 +163,7 @@ async function _updateAdvice(req, res){
         descriptions.forEach(async (description) => {
             description.foreign_id = adviceId;
             const descriptionRes = await descrUtils.update(description);
+            console.log(descriptionRes)
             if(descriptionRes.errno){
                 res.status(INT_ERR).send({ error: "Something bad occurs, please try again later..."})
                 return;
@@ -172,7 +173,7 @@ async function _updateAdvice(req, res){
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
-    db.close();
+    //db.close();
 }
 
 module.exports = {
