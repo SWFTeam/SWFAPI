@@ -55,11 +55,11 @@ if [ $# -gt 0 ]; then
     if [ $1 == "complete" ]; then
         echo -e "${YELLOW}Importing database structure 1 sample data...${NC}"
         mysql -u$DBUSER -p$DBPASSWORD < database/dump.sql
-        echo -e "${GREEN}Done${NC}$"
+        echo -e "${GREEN}Done${NC}"
     elif [ $1 == "empty" ]; then
         echo -e "${YELLOW}Importing only database structure...${NC}"
         mysql -u$DBUSER -p$DBPASSWORD < database/dump_empty.sql
-        echo -e "${GREEN}Done${NC}$"
+        echo -e "${GREEN}Done${NC}"
     else
         echo "Invalid parameter"
     fi
