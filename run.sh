@@ -5,6 +5,12 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 ORANGE='\033[0;33m'
 
+if [ $1 == "--help" ]; then 
+    echo -e "${YELLOW}Usage:"
+    echo -e "sudo ./run.sh [complete|empty] [db_user](default: root) [db_password](default: root)${NC}"
+    exit
+fi
+
 echo -e "${YELLOW}***** SWFAPI Runner 0.1 *****${NC}";
 
 if [[ $EUID -ne 0 ]]; then
@@ -38,22 +44,24 @@ elif [[ $OSTYPE == "linux-gnu"* ]]; then
     service mysql restart &> /dev/null
 fi
 echo -e "${GREEN}Done.${NC}"
-if [ $# -gt 0 ]; then 
-    if [ $1 == "complete" ]; then
-        echo -e "${YELLOW} Dumping database structure 1 sample data...${NC}$"
-        echo -e "${GREEN} Done${NC}$"
-    elif [ $1 == "empty" ]; then
-        echo -e "${YELLOW} Dumping database structure...${NC}$"
-        echo -e "${GREEN} Done${NC}$"
-    else
-        echo "Invalid parameter"
-    fi
+if [ $# -gt 0 ]; then
     if [ -z $2 ]; then
         DBUSER="root"
         DBPASSWORD="root"
     else
         DBUSER=$2
         DBPASSWORD=$3
+    fi
+    if [ $1 == "complete" ]; then
+        echo -e "${YELLOW} Importing database structure 1 sample data...${NC}$"
+        mysql -u$DBUSER -p$DBPASSWORD < database/dump.sql
+        echo -e "${GREEN} Done${NC}$"
+    elif [ $1 == "empty" ]; then
+        echo -e "${YELLOW} Importing only database structure...${NC}$"
+        mysql -u$DBUSER -p$DBPASSWORD < database/dump_empty.sql
+        echo -e "${GREEN} Done${NC}$"
+    else
+        echo "Invalid parameter"
     fi
     npm install
     npm run start
