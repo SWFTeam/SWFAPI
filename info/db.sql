@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS description (
     country_code VARCHAR(3),
     title VARCHAR(100) UNIQUE,
     name VARCHAR(100),
-    description VARCHAR(255),
+    description TEXT,
     type VARCHAR(10),
     foreign_id INT NOT NULL
     #need_id INT NULL,

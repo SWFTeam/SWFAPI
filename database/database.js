@@ -23,6 +23,8 @@ async function _insertInto(table, attributes, data){
     try {
         let insertedRequest = await _insertRequest(table, "insert");
         let sql = "INSERT INTO " + table  + " (" + attributes + ") VALUES ?;";
+        console.log(sql);
+        console.log(data);
         let result = await asyncQuery(sql, data);
         return result.insertId;
     } catch(e) {

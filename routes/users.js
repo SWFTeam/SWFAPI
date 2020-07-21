@@ -251,6 +251,7 @@ async function _updateUser(req, res){
         let userId = user.id;
         let address = user.address;
         user.email_address = user.email
+        console.log(req.body)
         if(user.is_admin){
             user.isAdmin = 1;
         } else {
@@ -264,12 +265,14 @@ async function _updateUser(req, res){
         delete user.token;
         delete user.password;
         delete user.is_admin;
+        delete user.id;
         db.connect(conf.db_server);
         let attributes = [];
         let values = [];
         for(attr in user){
             attributes.push(attr);
             values.push(user[attr]);
+            console.log(attr, user[attr])
         }
         const updateRes = await db.update(attributes, [values], "user", "id=" + userId);
         if(updateRes.errno){

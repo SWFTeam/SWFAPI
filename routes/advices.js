@@ -23,8 +23,6 @@ async function _createAdvice(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
-
     db.connect(conf.db_server);
     if(req.body){
         let descriptions = req.body.descriptions;
@@ -69,18 +67,16 @@ async function _getAllAdvices(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id;
     if(req.body){
         let advices = [];
         const advs = await db.select("*", "advice");
         for(advice of advs){
             let descriptions = []
             let description = await db.select("*", "description", "type='advice' AND foreign_id=" + advice.id);
-            description = description[0];
             descriptions.push(description)
             advices.push({
                 id: advice.id,
-                descriptions
+                descriptions: description
             });
         };
         if(advs.errno){
@@ -99,7 +95,6 @@ async function _getAdvice(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
     db.connect(conf.db_server);
     if(req.body.id){
         let adviceId = req.body.id;
@@ -153,7 +148,7 @@ async function _deleteAdvice(req, res){
     db.close();
 }
 
-async function _editAdvice(req, res){
+async function _updateAdvice(req, res){
     //Token VERIF
     const tok = req.get('Authorization');
     if(!tok) return res.status(UNAUTHORIZED).json({error: 'Unauthorized'});
@@ -161,7 +156,6 @@ async function _editAdvice(req, res){
     if(!decoded){
         return res.status(UNAUTHORIZED).send({error: "Not logged in."});
     }
-    const userId = decoded.id[0].id;
     db.connect(conf.db_server);
     if(req.body){
         let adviceId = req.body.id;
@@ -171,13 +165,13 @@ async function _editAdvice(req, res){
             const descriptionRes = await descrUtils.update(description);
             if(descriptionRes.errno){
                 res.status(INT_ERR).send({ error: "Something bad occurs, please try again later..."})
+                return;
             }
         });
         res.status(SUCCESS).send({ message: "Data successfully updated." });
     } else {
         res.status(INT_ERR).send("Something bad occurs, please try again later...");
     }
-
     db.close();
 }
 
@@ -186,5 +180,5 @@ module.exports = {
     getAdvice: _getAdvice,
     getAllAdvices: _getAllAdvices,
     delete: _deleteAdvice,
-    edit: _editAdvice
+    update: _updateAdvice
 }

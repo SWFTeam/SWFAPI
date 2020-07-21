@@ -63,7 +63,7 @@ app.get('/event/:id', events.getById)
  */
 app.post('/bo/advice', advices.create);
 app.delete('/advice', advices.delete);
-app.put('/advice', advices.edit);
+app.put('/bo/advice', advices.update);
 app.get('/advice', advices.getAdvice);
 app.get('/bo/advices', advices.getAllAdvices);
 
