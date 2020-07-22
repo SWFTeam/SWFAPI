@@ -5,7 +5,7 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 ORANGE='\033[0;33m'
 
-if [ $1 == "--help" ]; then 
+if [[ $1 -eq "--help" ]]; then 
     echo -e "${YELLOW}Usage:"
     echo -e "sudo ./run.sh [complete|empty] [db_user](default: root) [db_password](default: root)${NC}"
     exit
