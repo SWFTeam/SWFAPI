@@ -38,8 +38,7 @@ fi
 
 echo -e "${YELLOW}Starting mysql service...${NC}"
 if [[ $OSTYPE == "darwin"* ]]; then
-    #mysql.server restart &> /dev/null
-    echo "WIP"
+    mysql.server restart &> /dev/null
 elif [[ $OSTYPE == "linux-gnu"* ]]; then
     service mysql restart &> /dev/null
 fi
@@ -64,7 +63,7 @@ if [ $# -gt 0 ]; then
         echo "Invalid parameter"
     fi
     npm install
-    npm run start
+    npm run dev
     echo -e "${ORANGE}Using username ${DBUSER} with password ${DBPASSWORD}${NC}"
 else
     echo "No"
